@@ -10,4 +10,5 @@ def settings(request):
 	return HttpResponse("Settings")
 
 def log(request):
-	return HttpResponse("Tables page")
+	context = {}
+	return render(request, 'tablemanager/log.html', context)

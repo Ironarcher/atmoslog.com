@@ -38,6 +38,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'tablemanager',
+    'atmoslog_main',
+    'atmoslog_docs'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -56,7 +58,7 @@ ROOT_URLCONF = 'atmoslog.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

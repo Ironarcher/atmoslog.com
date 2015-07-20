@@ -18,5 +18,12 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^u/', include('tablemanager.urls')),
+    url(r'^log/', include('tablemanager.urls')),
+    #url(r'^about/', include('atmoslog_main.urls')),
+    #url(r'^docs/', include('atmoslog_docs.urls')),
+    url(r'^settings/$', 'tablemanager.views.settings'),
+    url(r'^login/$', 'django.contrib.auth.views.login', {'template_name' : 'atmoslog/login.html'}),
+    url(r'^logout/$', 'django.contrib.auth.views.logout'),
+    #url('', include('django.contrib.auth.urls')),
+    #url(r'^$', atmoslog_main.views.index),
 ]
