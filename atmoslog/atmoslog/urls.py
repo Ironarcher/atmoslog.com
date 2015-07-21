@@ -18,7 +18,7 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^log/', include('tablemanager.urls')),
+    url(r'^log/', include('tablemanager.urls', namespace='tables')),
     #url(r'^about/', include('atmoslog_main.urls')),
     #url(r'^docs/', include('atmoslog_docs.urls')),
     url(r'^settings/$', 'tablemanager.views.settings'),
