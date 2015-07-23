@@ -1,0 +1,13 @@
+def stress():
+	colors = ['Red', 'Yellow', 'Green', 'Orange', 'Purple', 'White', 'Blue', 'Black', 'Grey']
+	counter = 0
+	while counter < 100:
+		ls = []
+		data = {
+			"type" : "log",
+			"value" : colors[randint(0,8)],
+			"datetime" : int(time.time()),
+		}
+		ls.append(data)
+		counter = counter + 1
+	return ls
