@@ -10,14 +10,12 @@ import db_interface
 import re
 
 def index(request):
+	#For navbar control
+	if request.user.is_authenticated():
+		user = request.user.get_username()
+	else:
+		user = ""
 	return HttpResponse("Hello, world. You're at the log manager.")
-
-def settings(request):
-	return HttpResponse("Settings")
-
-def log(request):
-	context = {}
-	return render(request, 'tablemanager/log.html', context)
 
 def projectlog(request, projectname, tablename):
 	#For navbar control
@@ -117,7 +115,6 @@ def register_view(request):
 
 def create_project(request):
 	pass
-
 
 def projectsettings(request, projectname):
 	pass

@@ -29,6 +29,4 @@ urlpatterns = [
     url(r'^logout/$', 'tablemanager.views.logout_view'),
     url(r'^account/$', 'tablemanager.views.userpage'),
     url(r'^register/$', 'tablemanager.views.register_view'),
-
-    url(r'^$', 'atmoslog_main.views.index'),
 ]
