@@ -66,7 +66,10 @@ def createProject(name, creator, access):
 					   "contributors" : [creator],
 					   "readers" : [creator],
 					   "access" : access,
-					   "secret_key" : key}
+					   "secret_key" : key,
+					   "paid_logs" : 0,
+					   "free_logs" : 10000,
+					   "datecreated" : int(time.time())}
 		projects.insert_one(description)
 	else:
 		print("Error: Project name already exists. Choose a different name.")

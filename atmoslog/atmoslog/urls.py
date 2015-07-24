@@ -17,13 +17,18 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 urlpatterns = [
+    url(r'^$', 'atmoslog_main.views.index'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^log/', include('tablemanager.urls', namespace='tables')),
     #url(r'^about/', include('atmoslog_main.urls')),
     #url(r'^docs/', include('atmoslog_docs.urls')),
     url(r'^settings/$', 'tablemanager.views.settings'),
+
+    #User controls
     url(r'^login/$', 'tablemanager.views.login_view'),
     url(r'^logout/$', 'tablemanager.views.logout_view'),
     url(r'^account/$', 'tablemanager.views.userpage'),
+    url(r'^register/$', 'tablemanager.views.register_view'),
+
     url(r'^$', 'atmoslog_main.views.index'),
 ]

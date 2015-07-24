@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}AtmosLog: Register{% endblock %}
+
+{% block style %}
+@media (min-width: 400px) {
+.container{
+    max-width: 400px;
+    min-width: 200px;
+    vertical-align: middle;
+    float: none;
+}
+
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class-"center-block">
+        {% if "username_length" in issues%}
+            <div class="alert alert-warning">
+                The username must be between 4 and 50 characters.
+            </div>
+        {% endif %}
+        {% if "username_char" in issues%}
+            <div class="alert alert-warning">
+                The username can only contain alphanumeric characters and underscores.
+            </div>
+        {% endif %}
+        {% if "password_length" in issues%}
+            <div class="alert alert-warning">
+                The password must be between 6 and 50 characters.
+            </div>
+        {% endif %}
+        {% if "firstname_char" in issues%}
+            <div class="alert alert-warning">
+                The first name can only contain letters and spaces.
+            </div>
+        {% endif %}
+        {% if "lastname_char" in issues%}
+            <div class="alert alert-warning">
+                The last name can only contain letters and spaces.
+            </div>
+        {% endif %}
+        {% if "email_char" in issues%}
+            <div class="alert alert-warning">
+                The email is invalid.
+            </div>
+        {% endif %}
+
+        <h3 class="text-center">Register</h3>
+        <div class="well">
+            <form method="post" action="/register/" role="form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="username" name="username">
+                </div>
+                <div class="form-group">
+                    <label for="firstname">First Name</label>
+                    <input type="text" class="form-control" id="firstname" name="firstname" placeholder="Optional">
+                </div>
+                <div class="form-group">
+                    <label for="lastname">Last Name</label>
+                    <input type="text" class="form-control" id="lastname" name="lastname" placeholder="Optional">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password">
+                </div>
+                <div class="form-group">
+                    <label for="text">Email</label>
+                    <input type="text" class="form-control" id="email" name="email">
+                </div>
+                <button type="submit" value="login" class="btn btn-default">Submit</button>
+                <input type="hidden" name="next" value="{{ next }}" />
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{# Leave the right part of the navbar blank #}
+{% block navbarright %}
+<li><a href="/">Home</a></li>
+<li><a href="/getstarted">Get Started</a></li>
+<li><a href="/pricing">Pricing</a></li> 
+<li><a href="/docs">Documentation</a></li> 
+{% endblock %}
