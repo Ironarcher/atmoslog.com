@@ -1,8 +1,9 @@
-from django.shortcuts import render
-from django.http import HttpResponse, Http404
+from django.shortcuts import render, redirect
+from django.http import *
+from django.contrib.auth import authenticate, login, logout
+from django.template import RequestContext
+from django.contrib.auth.decorators import login_required
 import db_interface
-
-# Create your views here.
 
 def index(request):
 	return HttpResponse("Hello, world. You're at the log manager.")
@@ -37,3 +38,35 @@ def projectlog(request, projectname, tablename):
 			return render(request, 'tablemanager/tables.html', context)
 		else:
 			raise Http404("Table in this project does not exist.")
+
+def login_view(request):
+	status = "started"
+	username = password = ""
+	if request.method == "POST":
+		username = request.POST['username']
+		password = request.POST['password']
+		user = authenticate(username=username, password=password)
+		if user is not None:
+			if user.is_active:
+				login(request, user)
+				status = "success"
+				return redirect('atmoslog_main.views.index')
+			else:
+				status = "inactive"
+		else:
+			status = "failed"
+	return render(request, 'tablemanager/login.html', {"status" : status})
+
+def logout_view(request):
+	logout(request)
+
+def register_view(request):
+	pass
+
+def projectsettings(request, projectname):
+	pass
+
+@login_required(login_url='/login/')
+def userpage(request):
+	username = request.user.username
+

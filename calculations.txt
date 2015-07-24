@@ -1,0 +1,5 @@
+Calculations:
+
+Approximate per log (average) entry for small logs:		371.26 bytes
+Logs per gigabyte (average, small):						2693528 logs/gigabyte
+Logs per terabyte (average, small):						2.6935 gigalogs/terabyte

@@ -11,16 +11,16 @@
     {% endif %}
 {% endif %}
 
-<form method="post" action="{% url 'django.contrib.auth.views.login' %}">
+<form method="post" action="/login">
 {% csrf_token %}
 <table>
 <tr>
-    <td>{{ form.username.label_tag }}</td>
-    <td>{{ form.username }}</td>
+    <p>Username</p>
+    <input type="text" id="username" name="username" placeholder="Username">
 </tr>
 <tr>
-    <td>{{ form.password.label_tag }}</td>
-    <td>{{ form.password }}</td>
+    <p>Password</p>
+    <input type="text" id="password" name="password" placeholder="Password">
 </tr>
 </table>
 

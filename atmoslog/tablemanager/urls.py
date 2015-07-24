@@ -7,5 +7,6 @@ urlpatterns = [
     url(r'^log/', views.log, name='log'),
     url(r'^settings/$', views.settings, name='settings'),
     url(r'^(?P<projectname>\w{0,50})/(?P<tablename>\w{0,50})/$', views.projectlog,
-    	name='projectlog')
+    	name='projectlog'),
+    url(r'^(?P<projectname>\w{0,50})/$', views.projectsettings)
 ]

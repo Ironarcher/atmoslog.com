@@ -22,8 +22,8 @@ urlpatterns = [
     #url(r'^about/', include('atmoslog_main.urls')),
     #url(r'^docs/', include('atmoslog_docs.urls')),
     url(r'^settings/$', 'tablemanager.views.settings'),
-    url(r'^login/$', 'django.contrib.auth.views.login', {'template_name' : 'atmoslog/login.html'}),
-    url(r'^logout/$', 'django.contrib.auth.views.logout'),
-    #url('', include('django.contrib.auth.urls')),
-    #url(r'^$', atmoslog_main.views.index),
+    url(r'^login/$', 'tablemanager.views.login_view'),
+    url(r'^logout/$', 'tablemanager.views.logout_view'),
+    url(r'^account/$', 'tablemanager.views.userpage'),
+    url(r'^$', 'atmoslog_main.views.index'),
 ]
