@@ -6,41 +6,49 @@
 		<title>{% block title %}AtmosLog{% endblock %}</title>
 
 		<style>
+			body {
+				background-color: #FFF5EE;
+				font-family: 'Segoe UI', Frutiger, 'Frutiger Linotype', 'Dejavu Sans', 'Helvetica Neue', Arial, sans-serif;;
+			}
 			{% block style %}
 			{% endblock %}
 		</style>
 	</head>
 
 	<body>
-		<div id="navbar">
-			{% block nav %}
-				<nav class="navbar navbar-inverse">
-				  <div class="container-fluid">
-				    <div class="navbar-header">
-				      <a class="navbar-brand" href="/">Atmoslog</a>
-				    </div>
-				    <div>
-				    	{% block navbarspec %}
-					      <ul class="nav navbar-nav">
-					        <li class="active"><a href="/">Home</a></li>
-					        <li><a href="/getstarted">Get Started</a></li>
-					        <li><a href="/pricing">Pricing</a></li> 
-					        <li><a href="/docs">Documentation</a></li> 
-					      </ul>
-					      <ul class="nav navbar-nav navbar-right">
-					        <li><a href="/register"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
-					        <li><a href="/login"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
-					      </ul>
-					    {% endblock navbarspec %}
-				    </div>
-				  </div>
-				</nav>
-			{% endblock %}
-		</div>
+		<div class="whole">
+			<div class="container-fluid">
+				<div id="navbar">
+					{% block nav %}
+						<nav class="navbar navbar-inverse">
+						  <div class="container-fluid">
+						    <div class="navbar-header">
+						      <a class="navbar-brand" href="/">Atmoslog</a>
+						    </div>
+						    <div>
+						    	{% block navbarspec %}
+							      <ul class="nav navbar-nav">
+							        <li class="active"><a href="/">Home</a></li>
+							        <li><a href="/getstarted">Get Started</a></li>
+							        <li><a href="/pricing">Pricing</a></li> 
+							        <li><a href="/docs">Documentation</a></li> 
+							      </ul>
+							      <ul class="nav navbar-nav navbar-right">
+							        <li><a href="/register"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
+							        <li><a href="/login"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+							      </ul>
+							    {% endblock navbarspec %}
+						    </div>
+						  </div>
+						</nav>
+					{% endblock %}
+				</div>
 
-		<div id="content">
-			{% block content %}
-			{% endblock %}
+				<div id="content">
+					{% block content %}
+					{% endblock %}
+				</div>
+			</div>
 		</div>
 	</body>
 

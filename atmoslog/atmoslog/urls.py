@@ -29,4 +29,5 @@ urlpatterns = [
     url(r'^logout/$', 'tablemanager.views.logout_view'),
     url(r'^account/$', 'tablemanager.views.user_page'),
     url(r'^register/$', 'tablemanager.views.register_view'),
+    url(r'^create/$', 'tablemanager.views.create'),
 ]

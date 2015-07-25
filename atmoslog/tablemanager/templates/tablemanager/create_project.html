@@ -18,49 +18,66 @@
     <div class-"center-block">
         {% if "name_length" in issues%}
             <div class="alert alert-warning">
-                The project name must be between 4 and 50 characters.
+                <p class="text-center">The project name must be between 4 and 50 characters.</p>
             </div>
         {% endif %}
         {% if "name_char" in issues%}
             <div class="alert alert-warning">
-               The project name can only contain alphanumeric characters and underscores.
+               <p class="text-center">The project name can only contain alphanumeric characters and underscores.</p>
             </div>
         {% endif %}
         {% if "description_length" in issues%}
             <div class="alert alert-warning">
-               The project description must be less than 500 characters.
+               <p class="text-center">The project description must be less than 500 characters.</p>
             </div>
         {% endif %}
         {% if "name_taken" in issues%}
             <div class="alert alert-warning">
-               The project name can only contain alphanumeric characters and underscores.
+               <p class="text-center">The project name can only contain alphanumeric characters and underscores.</p>
             </div>
         {% endif %}
 
-        <h3 class="text-center">Register</h3>
+        <h3 class="text-center">New Project</h3>
         <div class="well">
-            <form method="post" action="/register/" role="form">
+            <form method="post" action="/create/" role="form">
                 {% csrf_token %}
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" class="form-control" id="username" name="username">
+
+                {% if "name_length" in issues or "name_char" in issues or "name_taken" in issues %}
+                    <div class="form-group has-error has-feedback">
+                {% elif not first %}
+                    <div class="form-group has-success has-feedback">
+                {% else %}
+                    <div class="form-group">
+                {% endif %}
+                    <label for="name">Project Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value={{ name_init }}>
+                {% if "name_length" in issues or "name_char" in issues or "name_taken" in issues %}
+                    <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                {% elif not first %}
+                    <span class="glyphicon glyphicon-ok form-control-feedback"></span>
+                {% endif %}
                 </div>
-                <div class="form-group">
-                    <label for="firstname">First Name</label>
-                    <input type="text" class="form-control" id="firstname" name="firstname" placeholder="Optional">
+
+                {% if "description_length" in issues %}
+                    <div class="form-group has-error has-feedback">
+                {% elif not first %}
+                    <div class="form-group has-success has-feedback">
+                {% else %}
+                    <div class="form-group">
+                {% endif %}
+                    <label for="description">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4" placeholder="Optional">{{description_init}}</textarea>
+                {% if "description_length" in issues %}
+                    <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                {% elif not first %}
+                    <span class="glyphicon glyphicon-ok form-control-feedback"></span>
+                {% endif %}
                 </div>
-                <div class="form-group">
-                    <label for="lastname">Last Name</label>
-                    <input type="text" class="form-control" id="lastname" name="lastname" placeholder="Optional">
+
+                <div class="checkbox">
+                    <label><input id="public" type="checkbox">Public?</label>
                 </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" class="form-control" id="password" name="password">
-                </div>
-                <div class="form-group">
-                    <label for="text">Email</label>
-                    <input type="text" class="form-control" id="email" name="email">
-                </div>
+
                 <button type="submit" value="login" class="btn btn-default">Submit</button>
                 <input type="hidden" name="next" value="{{ next }}" />
             </form>

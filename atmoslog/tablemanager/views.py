@@ -138,13 +138,14 @@ def register_view(request):
 	return render(request, 'tablemanager/register.html', context)
 
 @login_required(login_url="/login/")
-def create_project(request):
+def create(request):
 	issues = []
 	#Another variable: Access -> true = public && false = private
 	name = description = ""
 	if request.method == "POST":
+		first = False
 		name = request.POST['name']
-		description = request.POST['']
+		description = request.POST['description']
 		creator = request.user.get_username()
 		access = request.POST.get('public', None)
 		if len(name) < 4 or len(name) > 50:
@@ -166,18 +167,27 @@ def create_project(request):
 				access_real = 'public'
 			else:
 				access_real = 'private'
-			db_interface.create_project(name, creator, access, description)
-			return redirect('projectsettings', projectname=name)
-
-	return render(request, 'tablemanager/create_project.html', {"issues" : issues})
+			db_interface.createProject(name, creator, access, description)
+			return redirect('project_settings', projectname=name)
+	else:
+		first = True
+	context = {
+		"issues" : issues,
+		"first" : first,
+		"name_init" : name,
+		"description_init": description,
+	}
+	return render(request, 'tablemanager/create_project.html', context)
 
 @login_required(login_url="/login/")
 def project_settings(request, projectname):
-	pass
+	return HttpResponse("work in progress")
 
 @login_required(login_url='/login/')
 def user_page(request):
-	username = request.user.username
+	username = request.user.get_username()
+
+	return None
 
 def check_user_exists(username):
 	if User.objects.filter(username=username).exists():
