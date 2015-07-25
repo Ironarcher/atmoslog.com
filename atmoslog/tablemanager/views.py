@@ -51,6 +51,7 @@ def login_view(request):
 	status = "started"
 	username = password = ""
 	if request.method == "POST":
+		first = False
 		username = request.POST['username']
 		password = request.POST['password']
 		user = authenticate(username=username, password=password)
@@ -60,21 +61,30 @@ def login_view(request):
 				status = "success"
 				if not request.POST.get('remember_me', None):
 					request.session.set_expiry(0)
-				return redirect('atmoslog_main.views.index')
+				return HttpResponseRedirect("/")
 			else:
 				status = "inactive"
 		else:
 			status = "failed"
-	return render(request, 'tablemanager/login.html', {"status" : status})
+	else:
+		first = True
+	context = {
+		"status" : status,
+		"first" : first,
+		"username_init" : username,
+		"password_init" : password,
+	}
+	return render(request, 'tablemanager/login.html', context)
 
 def logout_view(request):
 	logout(request)
-	return redirect('atmoslog_main.views.index')
+	return HttpResponseRedirect("/")
 
 def register_view(request):
 	issues = []
 	username = firstname = lastname = password = email = ""
 	if request.method == "POST":
+		first = False
 		username = request.POST['username']
 		password = request.POST['password']
 		firstname = request.POST['firstname']
@@ -98,6 +108,9 @@ def register_view(request):
 		if re.match("^[A-Za-z@.]*$", email) is None or len(email) < 3:
 			#Email invalid
 			issues.append("email_char")
+		if check_user_exists(username):
+			#User already exists
+			issues.append("username_taken")
 
 		#Sign the user up
 		if len(issues) == 0:
@@ -109,17 +122,66 @@ def register_view(request):
 			user.save()
 			#Redirect the user to the verification process
 			#TO-DO
-			return redirect('atmoslog_main.views.index')
+			return HttpResponseRedirect("/")
+	else:
+		first = True
 
-	return render(request, 'tablemanager/register.html', {"issues" : issues})
+	context = {
+		"issues" : issues,
+		"first" : first,
+		"username_init" : username,
+		"password_init" : password,
+		"firstname_init" : firstname,
+		"lastname_init" : lastname,
+		"email_init" : email,
+	}
+	return render(request, 'tablemanager/register.html', context)
 
+@login_required(login_url="/login/")
 def create_project(request):
-	pass
+	issues = []
+	#Another variable: Access -> true = public && false = private
+	name = description = ""
+	if request.method == "POST":
+		name = request.POST['name']
+		description = request.POST['']
+		creator = request.user.get_username()
+		access = request.POST.get('public', None)
+		if len(name) < 4 or len(name) > 50:
+			#Project name must be 4-50 characters long.
+			issues.append("name_length")
+		if re.match('^\w+$', name) is None and len(name) != 0:
+			#Project name can only contain characters and numbers and underscores.
+			issues.append("name_char")
+		if len(description) > 500:
+			#Description is optional
+			#If description must be under 500 characters long.
+			issues.append("description_length")
+		if db_interface.checkProjectExists(name):
+			issues.append("name_taken")
 
-def projectsettings(request, projectname):
+		#Create the project:
+		if len(issues) == 0:
+			if access:
+				access_real = 'public'
+			else:
+				access_real = 'private'
+			db_interface.create_project(name, creator, access, description)
+			return redirect('projectsettings', projectname=name)
+
+	return render(request, 'tablemanager/create_project.html', {"issues" : issues})
+
+@login_required(login_url="/login/")
+def project_settings(request, projectname):
 	pass
 
 @login_required(login_url='/login/')
-def userpage(request):
+def user_page(request):
 	username = request.user.username
+
+def check_user_exists(username):
+	if User.objects.filter(username=username).exists():
+		return True
+	else:
+		return False
 

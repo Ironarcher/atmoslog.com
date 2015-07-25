@@ -27,6 +27,6 @@ urlpatterns = [
     #User controls
     url(r'^login/$', 'tablemanager.views.login_view'),
     url(r'^logout/$', 'tablemanager.views.logout_view'),
-    url(r'^account/$', 'tablemanager.views.userpage'),
+    url(r'^account/$', 'tablemanager.views.user_page'),
     url(r'^register/$', 'tablemanager.views.register_view'),
 ]

@@ -22,11 +22,11 @@
             {# Should have already redirected #}
         {% elif status == "inactive" %}
             <div class="alert alert-danger">
-                <strong>Alert!</strong>Account has expired. Visit atmoslog support.
+                <p class="text-center"><strong>Alert!</strong>Account has expired. Visit atmoslog support.</p>
             </div>
         {% elif status == "failed" %}
             <div class="alert alert-warning">
-                Incorrect username and/or password. Try again.
+                <p class="text-center">Incorrect username and/or password. Try again.</p>
             </div>
         {% endif %}
 
@@ -34,18 +34,34 @@
         <div class="well">
             <form method="post" action="/login/" role="form">
                 {% csrf_token %}
-                <div class="form-group">
+                {% if status == "inactive" or status == "failed" %}
+                    <div class="form-group has-error has-feedback">
+                {% elif not first %}
+                    <div class="form-group has-success has-feedback">
+                {% else %}
+                    <div class="form-group">
+                {% endif %}
                     <label for="username">Username</label>
-                    <input type="text" class="form-control" id="username" name="username">
+                    <input type="text" class="form-control" id="username" name="username" value= {{ username_init }}>
                 </div>
-                <div class="form-group">
+
+                {% if status == "inactive" or status == "failed" %}
+                    <div class="form-group has-error has-feedback">
+                {% elif not first %}
+                    <div class="form-group has-success has-feedback">
+                {% else %}
+                    <div class="form-group">
+                {% endif %}
                     <label for="password">Password</label>
-                    <input type="password" class="form-control" id="password" name="password">
+                    <input type="password" class="form-control" id="password" name="password" value= {{ password_init }}>
                 </div>
+
                 <div class="checkbox">
                     <label><input id="remember" type="checkbox">Remember me</label>
                 </div>
-                <button type="submit" value="login" class="btn btn-default">Submit</button>
+                <div class="center-block">
+                    <button type="submit" value="login" class="btn btn-default">Submit</button>
+                </div>
                 <input type="hidden" name="next" value="{{ next }}" />
             </form>
         </div>

@@ -46,7 +46,7 @@ def createTable(ownerproject, tablename):
 		print("Error: Owner proejct does not exist")
 
 #Access setting: Either public or private
-def createProject(name, creator, access):
+def createProject(name, creator, access, description):
 	if re.match('^\w+$', name) is None:
 		print('Only alphanumeric characters and underscores can be included in the project name.')
 		return
@@ -60,19 +60,29 @@ def createProject(name, creator, access):
 		key = randKey(20)
 
 	if projects.find_one({"name" : name}) is None:
-		description = {"name" : name,
-					   "tables" : [name + '-log'],
-					   "admins" : [creator],
-					   "contributors" : [creator],
-					   "readers" : [creator],
-					   "access" : access,
-					   "secret_key" : key,
-					   "paid_logs" : 0,
-					   "free_logs" : 10000,
-					   "datecreated" : int(time.time())}
-		projects.insert_one(description)
+		doc = {"name" : name,
+			   "description" : description,
+			   "tables" : [name + '-log'],
+			   "admins" : [creator],
+			   "contributors" : [creator],
+			   "readers" : [creator],
+			   "access" : access,
+			   "secret_key" : key,
+			   "paid_logs" : 0,
+			   "free_logs" : 10000,
+			   "datecreated" : int(time.time())}
+		projects.insert_one(doc)
 	else:
 		print("Error: Project name already exists. Choose a different name.")
+
+def checkProjectExists(name):
+	projects = db['projects']
+	if projects.find_one({"name" : name}) is None:
+		#If project with that name doesn't exist, then return false.
+		return False
+	else:
+		#Otherwise return true.
+		return True
 
 def log(project, table, value):
 	name = project + "-" + table
