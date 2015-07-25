@@ -17,6 +17,7 @@ def index(request):
 		user = ""
 	return HttpResponse("Hello, world. You're at the log manager.")
 
+@login_required(login_url="/login/")
 def projectlog(request, projectname, tablename):
 	#For navbar control
 	if request.user.is_authenticated():
@@ -35,6 +36,7 @@ def projectlog(request, projectname, tablename):
 		length = len(projectname) + 1
 		for table in tables:
 			revisedtables.append(table[length:])
+			print(table)
 		if name in tables:
 			context = {
 				'specific_project' : projectname, 

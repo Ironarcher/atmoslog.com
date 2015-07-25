@@ -72,6 +72,9 @@ def createProject(name, creator, access, description):
 			   "free_logs" : 10000,
 			   "datecreated" : int(time.time())}
 		projects.insert_one(doc)
+
+		#Create the first table (called log)
+		createTable(name, "log")
 	else:
 		print("Error: Project name already exists. Choose a different name.")
 
