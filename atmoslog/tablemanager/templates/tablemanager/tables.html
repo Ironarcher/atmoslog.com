@@ -1,47 +1,133 @@
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-	<meta charset="utf-8"/>
-	<style>
-	</style>
+{% block title %}AtmosLog: View tables{% endblock %}
 
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+{% block style %}
+.vertlist{
+	display: block;
+}
+hr{
+	color: black;
+}
+#tabletitle{
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+.descript{
+	display: block;
+}
+#tablefooter{
+	margin-bottom: 0px;
+}
+#tablebtn{
 
-</head>
+}
+{% endblock %}
 
-<body>
-	<nav class="navbar navbar-inverse">
-		<div class="container-fluid">
-			<div class="navbar-header">
-				<a class="navbar-brand" href="/">AtmosLog</a>
-			</div>
-			<!--
-			<div>
-				<ul class="nav navbar-nav">
-				 insert different pages here
-				<li><a href="#">Page 1</a></li>
-				
-				</ul>
-				<ul class="nav navbar-nav navbar-right">
-				</ul>
-			</div>
-			-->
-		</div>
-	</nav>
+{% block script%}
 
+	{% if first %}
+	document.ready(function(){
+		$('#createTable').modal({});
+	});
+	{% endif %} 
+
+{% endblock %}
+
+{% block content %}
 	<div class="container-fluid">
+		<!-- Modal -->
+		<div class="modal fade" id="createTable" tabindex="-1" role="dialog" aria-labelledby="createTable" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="createTableLabel">Create Table</h4>
+		      </div>
+		      <div class="modal-body">
+		      	{% if "name_length" in issues%}
+		            <div class="alert alert-warning">
+		                <p class="text-center">The table name must be between 3 and 50 characters.</p>
+		            </div>
+		        {% endif %}
+		        {% if "name_char" in issues%}
+		            <div class="alert alert-warning">
+		                <p class="text-center">The table must can only contain alphanumeric characters and underscores.</p>
+		            </div>
+		        {% endif %}
+		     	<form method="post" action="/log/{{ specific_project }}/{{ specific_table }}/" role="form">
+		     		{% csrf_token %}
+		     		{% if "name_length" in issues or "name_char" in issues %}
+                    	<div class="form-group has-error has-feedback">
+	                {% elif not first %}
+	                    <div class="form-group has-success has-feedback">
+	                {% else %}
+	                    <div class="form-group">
+	                {% endif %}
+	                    <label for="name">Name</label>
+	                    <input type="text" class="form-control" id="name" name="name">
+	                {% if "name_length" in issues or "name_char" in issues %}
+	                    <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+	                {% elif not first %}
+	                    <span class="glyphicon glyphicon-ok form-control-feedback"></span>
+	                {% endif %}
+	                </div>
+	                <p class="text-centered">Data Type:</p>
+	                <div class="radio">
+					  <label>
+					    <input type="radio" name="quanqual" id="qualitative" value="qualitative" {% if quanqual == "qualitative" %}checked{% endif %}>
+					    Qualitative data (Colors, gender, word data)
+					  </label>
+					</div>
+					<div class="radio">
+					  <label>
+					    <input type="radio" name="quanqual" id="quantitative" value="quantitative" {% if quanqual == "quantitative" %}checked{% endif %}>
+					    Quantitative data (Numbered data)
+					  </label>
+					</div>
+
+					<div class="radio">
+					  <label>
+					    <input type="radio" name="discretecontinuous" id="discrete" value="discrete" checked>
+					    Discrete (1, 2, 3, 4, 5)
+					  </label>
+					</div>
+					<div class="radio">
+					  <label>
+					    <input type="radio" name="discretecontinuous" id="continuous" value="continuous" checked>
+					    Continuous (1.11, 2.76, to fit into 1-2, 2-3)
+					  </label>
+					</div>
+					<input type="hidden" name="next" value="{{ next }}" />
+		     		<button type="submit" value="login" class="btn btn-default">Create</button>
+		     	</form>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
 		<div class="row">
 			<div class="col-sm-3">
-				<div class="well">
-					{% for table in tablelist %}
-						<a href="{% url 'tables:projectlog' specific_project table %}">{{ table }}</a>
-					{% endfor %}
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<h3 class="text-center" id="tabletitle">{{ specific_project }}<a class="descript" href="/log/{{ specific_project}}"><small>Project Home</small></a></h3>
+						<hr>
+						<ul>
+							{% for table in tablelist %}
+								<li><a class="vertlist" href="/log/{{ specific_project }}/{{ table }}">{{ table }}</a></li>
+							{% endfor %}
+						</ul>
+					</div>
+					<div class="panel-footer">
+						<p class="text-center" id="tablefooter">List of Tables</p>
+					</div>
 				</div>
 			</div>
 			<div class="col-sm-9">
 				<div class="panel panel-default">
-					<div class="panel-heading">Viewing table: {{ specific_table }} </div>
+					<div class="panel-heading">Viewing table:<strong> {{ specific_table }} </strong></div>
 					<div class="panel-body">
 						<table class="table table-striped">
 							<thead>
@@ -60,10 +146,37 @@
 						<h4>Statistics</h4>
 						<p>Amount of logs: {{ logcount }}</p>
 					</div>
-				</div>
+				</iv>
 			</div>
 		</div>
 	</div>
-</body
+
+{% endblock %}
+
+{% block navbarspec %}
+	<ul class="nav navbar-nav">
+		<li class="active"><a href="/">{{ specific_project }}</a></li>
+		<li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"> Switch Projects <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="/create">Create a new project</a></li>
+          </ul>
+        </li>
+	</ul>
+	<button id="tablebtn" type="button" class="btn btn-default navbar-btn" data-toggle="modal" data-target="#createTable">
+			<span class="glyphicon glyphicon-plus-sign"></span> Create Table
+		</button>
+	<ul class="nav navbar-nav navbar-right">
+		<li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ user }} <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="/create">Create a new project</a></li>
+            <li><a href="/account/">View your profile</a></li>
+            <li class="divider"></li>
+            <li><a href="/logout">Logout</a></li>
+          </ul>
+        </li>
+	</ul>
+{% endblock %}
 
 </html>

@@ -39,7 +39,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'tablemanager',
     'atmoslog_main',
-    'atmoslog_docs'
+    'atmoslog_docs',
+    'logapi',
 )
 
 MIDDLEWARE_CLASSES = (

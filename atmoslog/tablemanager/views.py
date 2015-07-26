@@ -3,8 +3,6 @@ from django.shortcuts import render, redirect
 from django.http import *
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.template import RequestContext
-from django.contrib.auth.decorators import login_required
 import db_interface
 
 import re
@@ -14,16 +12,47 @@ def index(request):
 	if request.user.is_authenticated():
 		user = request.user.get_username()
 	else:
-		user = ""
-	return HttpResponse("Hello, world. You're at the log manager.")
+		user = "World"
+	return HttpResponse("Hello, %s. You're at the log manager." % user)
 
-@login_required(login_url="/login/")
 def projectlog(request, projectname, tablename):
 	#For navbar control
 	if request.user.is_authenticated():
 		user = request.user.get_username()
 	else:
-		user = ""
+		return HttpResponseRedirect('/login/tables-%s-%s/' % (projectname, tablename))
+
+	issues = []
+	newname = quanqual = discretecontinuous = ""
+	if request.method == "POST":
+		first = False
+		newname = request.POST['name']
+		quanqual = request.POST['quanqual']
+		discretecontinuous = request.POST['discretecontinuous']
+		if len(newname) > 50 or len(newname) < 3:
+			issues.append("name_length")
+		if re.match('^\w+$', newname) is None and len(newname) != 0:
+			issues.append("name_char")
+
+		if len(issues) == 0:
+			#Create the table type to help with graphing later
+			print(quanqual)
+			print(discretecontinuous)
+			if quanqual == "qualitative":
+				tabletype = "qualitative"
+			elif quanqual == "quantitative" and discretecontinuous == "discrete":
+				tabletype = "quantitative_discrete"
+			elif quanqual == "quantitative" and discretecontinuous == "continuous":
+				tabletype = "quantitative_continuous"
+			else:
+				print('Critical error')
+				return
+			#Create the table
+			print("creating new table")
+			db_interface.createTable(projectname, newname, tabletype)
+			return HttpResponseRedirect('/log/%s/%s/' % (projectname, newname))
+	else:
+		first = True
 
 	tables = db_interface.gettables(projectname)
 	if len(tables) == 0:
@@ -43,7 +72,13 @@ def projectlog(request, projectname, tablename):
 				'tablelist' : revisedtables,
 				'specific_table' : tablename,
 				'logs' : db_interface.findlogs(projectname, tablename, 20),
-				'logcount' : db_interface.getlogcount(projectname, tablename)
+				'logcount' : db_interface.getlogcount(projectname, tablename),
+				'username' : request.user.get_username(),
+				'first' : first,
+				'newname' : newname,
+				'quanqual' : quanqual,
+				'discretecontinuous' : discretecontinuous,
+				'issues' : issues,
 			}
 			return render(request, 'tablemanager/tables.html', context)
 		else:
@@ -61,8 +96,13 @@ def login_view(request):
 			if user.is_active:
 				login(request, user)
 				status = "success"
-				if not request.POST.get('remember_me', None):
-					request.session.set_expiry(0)
+				#if not request.POST.get('remember_me', None):
+				#	request.session.set_expiry(0)
+				#if next.startswith("tables-"):
+				#	parts = next.split("-")
+				#	return HttpResponseRedirect("/log/%s/%s/" % (parts[1], parts[2]))
+				#else:
+				#	return HttpResponseRedirect("/")
 				return HttpResponseRedirect("/")
 			else:
 				status = "inactive"
@@ -75,6 +115,7 @@ def login_view(request):
 		"first" : first,
 		"username_init" : username,
 		"password_init" : password,
+		#"next" : next,
 	}
 	return render(request, 'tablemanager/login.html', context)
 
@@ -139,8 +180,9 @@ def register_view(request):
 	}
 	return render(request, 'tablemanager/register.html', context)
 
-@login_required(login_url="/login/")
 def create(request):
+	if not request.user.is_authenticated():
+		return HttpResponseRedirect("/login/")
 	issues = []
 	#Another variable: Access -> true = public && false = private
 	name = description = ""
@@ -170,7 +212,7 @@ def create(request):
 			else:
 				access_real = 'private'
 			db_interface.createProject(name, creator, access, description)
-			return redirect('project_settings', projectname=name)
+			return HttpResponseRedirect('/log/%s' % name)
 	else:
 		first = True
 	context = {
@@ -181,7 +223,7 @@ def create(request):
 	}
 	return render(request, 'tablemanager/create_project.html', context)
 
-@login_required(login_url="/login/")
+#@login_required(redirect_)
 def project_settings(request, projectname):
 	return HttpResponse("work in progress")
 

@@ -13,12 +13,16 @@ def randKey(digits):
 	return ''.join(random.choice(
 		'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz') for i in range(digits))
 
-def createTable(ownerproject, tablename):
+#Table types: qualitative, quantitative_discrete, quantitative_continuous
+def createTable(ownerproject, tablename, tabletype):
 	if re.match('^\w+$', tablename) is None:
 		print('Only alphanumeric characters and underscores can be included in the table name.')
 		return
 	elif len(tablename) > maximumlength:
 		print('Maximum length of the table name is 50 characters.')
+		return
+	if tabletype is not "qualitative" and tabletype is not "quantitative_discrete" and tabletype is not "quantitative_continuous":
+		print('Tabletype incorrect')
 		return
 
 	projects = db['projects']
@@ -28,6 +32,7 @@ def createTable(ownerproject, tablename):
 		if name not in db.collection_names():
 			db.create_collection(name)
 			description = {"type" : "description",
+						   "tabletype" : tabletype,
 						   "duplicate_loss" : 0,
 						   "invalid_api_key" : 0,
 						   "server_error" : 0,
@@ -74,9 +79,16 @@ def createProject(name, creator, access, description):
 		projects.insert_one(doc)
 
 		#Create the first table (called log)
-		createTable(name, "log")
+		createTable(name, "log", "qualitative")
 	else:
 		print("Error: Project name already exists. Choose a different name.")
+
+def chargeProject(project, amt):
+	projects = db['projects']
+	projectfile = projects.find_one({"name" : project})
+	#Update the project file to subtract one from free_logs. If there are none in free_logs, charge from paid_logs
+	#Also check if in debt, from 0 to -100, show warning on the table dashboard, from -100 down, deny logging
+	#Remember to reset to 10k free_logs atleast a month, converted to seconds, after the datecreated
 
 def checkProjectExists(name):
 	projects = db['projects']
@@ -135,3 +147,15 @@ def gettables(project):
 			#is not in the blacklist, add it to the returned list
 			results.append(table)
 	return results
+
+def checkTableExists(project):
+	tables = gettables(project)
+	if len(tables) == 0:
+		return False
+	else:
+		return True
+
+def getProjectFromKey(apikey):
+	projects = db['projects']
+	projectfile = projects.find_one({"secret_key" : apikey})
+	return projectfile['name']
