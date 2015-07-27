@@ -23,7 +23,7 @@ urlpatterns = [
     #url(r'^about/', include('atmoslog_main.urls')),
     #url(r'^docs/', include('atmoslog_docs.urls')),
     url(r'^settings/$', 'tablemanager.views.settings'),
-    url(r'^api/$', include('logapi.views', namespace='api')),
+    url(r'^api/', include('logapi.urls')),
 
     #User controls
     url(r'^login/$', 'tablemanager.views.login_view'),

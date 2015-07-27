@@ -3,6 +3,8 @@
 	<head>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="stylesheet" href="/static/bootstrap-3.3.5-dist/css/bootstrap.min.css">
+		<script type="text/javascript" src="/static/jquery2_1_4.js"></script>
+		<script type="text/javascript" src="/static/bootstrap-3.3.5-dist/js/bootstrap.js"></script>
 		<!-- <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"> -->
 		<title>AtmosLog: Logging Database and Data Analysis</title>
 
@@ -58,9 +60,22 @@
 									        <li><a href="/docs">Documentation</a></li> 
 									      </ul>
 									      <ul class="nav navbar-nav navbar-right">
+									      {% if authenticated %}
+									      	<li class="dropdown">
+									          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ user }} <span class="caret"></span></a>
+									          <ul class="dropdown-menu" role="menu">
+									            <li><a href="/create">Create a new project</a></li>
+									            <li><a href="/account/">View your profile</a></li>
+									            <li class="divider"></li>
+									            <li><a href="/logout">Logout</a></li>
+									          </ul>
+									        </li>
+									      </ul>
+									      {% else %}
 									        <li><a href="/register"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
 									        <li><a href="/login"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
 									      </ul>
+									      {% endif %}
 								    </div>
 								  </div>
 								</nav>

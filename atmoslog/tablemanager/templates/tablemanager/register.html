@@ -150,9 +150,12 @@
 {% endblock %}
 
 {# Leave the right part of the navbar blank #}
-{% block navbarright %}
-<li><a href="/">Home</a></li>
-<li><a href="/getstarted">Get Started</a></li>
-<li><a href="/pricing">Pricing</a></li> 
-<li><a href="/docs">Documentation</a></li> 
+{% block navbarspec %}
+<ul class="nav navbar-nav">
+    <li class="active"><a href="/">Home</a></li>
+    <li><a href="/getstarted">Get Started</a></li>
+    <li><a href="/pricing">Pricing</a></li> 
+    <li><a href="/docs">Documentation</a></li> 
+    </ul>
+</ul> 
 {% endblock %}

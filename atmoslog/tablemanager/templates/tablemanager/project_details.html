@@ -1,0 +1,21 @@
+{% extends "tables.html" %}
+
+{% block inside %}
+<div class="panel panel-default">
+	<div class="panel-heading">Project details</div>
+		<div class="panel-body">
+			<ul class="nav nav-pills">
+			  <li role="presentation" class="active"><a href="#">Home</a></li>
+			  <li role="presentation"><a href="#">Add funds</a></li>
+			</ul>
+			<p>Name: {{ specific_project }}</p>
+			<p>Description: {{ project_description }}</p>
+			<p>Funds Remaining: {{ project_funds }}</p>
+			<p>Access: {{ project_access }}</p>
+			<p>Free Logs Remaining: {{ project_free_logs }}</p>
+			<p>Created: {{ project_date_created }}</p>
+			<p>Secret Key: {{ secret_key }}</p>
+		</div>
+	</div>
+</div>
+{% endblock %}

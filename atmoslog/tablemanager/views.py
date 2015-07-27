@@ -16,9 +16,29 @@ def index(request):
 	return HttpResponse("Hello, %s. You're at the log manager." % user)
 
 def projectlog(request, projectname, tablename):
-	#For navbar control
+	#For navbar control and user access verification
 	if request.user.is_authenticated():
 		user = request.user.get_username()
+		access = db_interface.getProjectAccess(projectname) 
+		if access is None:
+			raise Http404("Project does not exist.")
+		elif access == "private":
+			myproject = True
+			projectlist = db_interface.getUserProjects(user) 
+			print projectlist
+			print user
+			if projectname in projectlist:
+				projectlist.remove(projectname)
+			else:
+				raise Http404("User access denied.")
+		elif access == "public":
+			projectlist = db_interface.getUserProjects(user)
+			if projectname in projectlist:
+				myproject = True
+				projectlist.remove(projectname)
+			else:
+				myproject = False
+
 	else:
 		return HttpResponseRedirect('/login/tables-%s-%s/' % (projectname, tablename))
 
@@ -66,23 +86,32 @@ def projectlog(request, projectname, tablename):
 		for table in tables:
 			revisedtables.append(table[length:])
 			print(table)
+
+		#Compile list of all projects by the user and exclude the current one
+		#TODO: Make a webpage that is a complete list of all the user's recently viewed projects,
+		#owned projects, and a project search bar
+
+		context = {
+			'specific_project' : projectname, 
+			'tablelist' : revisedtables,
+			'specific_table' : tablename,
+			'logs' : db_interface.findlogs(projectname, tablename, 20),
+			'logcount' : db_interface.getlogcount(projectname, tablename),
+			'username' : user,
+			'first' : first,
+			'newname' : newname,
+			'quanqual' : quanqual,
+			'discretecontinuous' : discretecontinuous,
+			'issues' : issues,
+			'projectlist' : projectlist,
+			'myproject' : myproject,
+		}
+
 		if name in tables:
-			context = {
-				'specific_project' : projectname, 
-				'tablelist' : revisedtables,
-				'specific_table' : tablename,
-				'logs' : db_interface.findlogs(projectname, tablename, 20),
-				'logcount' : db_interface.getlogcount(projectname, tablename),
-				'username' : request.user.get_username(),
-				'first' : first,
-				'newname' : newname,
-				'quanqual' : quanqual,
-				'discretecontinuous' : discretecontinuous,
-				'issues' : issues,
-			}
-			return render(request, 'tablemanager/tables.html', context)
+			return render(request, 'tablemanager/table_view.html', context)
 		else:
-			raise Http404("Table in this project does not exist.")
+			#raise Http404("Table in this project does not exist.")
+			return render(request, 'tablemanager/table_does_not_exist.html', context)
 
 def login_view(request):
 	status = "started"
@@ -96,7 +125,7 @@ def login_view(request):
 			if user.is_active:
 				login(request, user)
 				status = "success"
-				#if not request.POST.get('remember_me', None):
+				#if request.POST.get('remember_me', None) is None:
 				#	request.session.set_expiry(0)
 				#if next.startswith("tables-"):
 				#	parts = next.split("-")
@@ -191,7 +220,9 @@ def create(request):
 		name = request.POST['name']
 		description = request.POST['description']
 		creator = request.user.get_username()
-		access = request.POST.get('public', None)
+		#TODO: fix the access (can only be private for some reason)
+		access = request.POST.get('public', 'public')
+		print(access)
 		if len(name) < 4 or len(name) > 50:
 			#Project name must be 4-50 characters long.
 			issues.append("name_length")
@@ -223,11 +254,103 @@ def create(request):
 	}
 	return render(request, 'tablemanager/create_project.html', context)
 
-#@login_required(redirect_)
+#Login is required to view this page
 def project_settings(request, projectname):
-	return HttpResponse("work in progress")
+	#For navbar control and user access verification
+	if request.user.is_authenticated():
+		user = request.user.get_username()
+		access = db_interface.getProjectAccess(projectname) 
+		if access is None:
+			raise Http404("Project does not exist.")
+		elif access == "private":
+			myproject = True
+			projectlist = db_interface.getUserProjects(user) 
+			print projectlist
+			print user
+			if projectname in projectlist:
+				projectlist.remove(projectname)
+			else:
+				raise Http404("User access denied.")
+		elif access == "public":
+			projectlist = db_interface.getUserProjects(user)
+			if projectname in projectlist:
+				myproject = True
+				projectlist.remove(projectname)
+			else:
+				myproject = False
 
-@login_required(login_url='/login/')
+	else:
+		return HttpResponseRedirect('/login/tables-%s-%s/' % (projectname, tablename))
+
+	issues = []
+	newname = quanqual = discretecontinuous = ""
+	if request.method == "POST":
+		first = False
+		newname = request.POST['name']
+		quanqual = request.POST['quanqual']
+		discretecontinuous = request.POST['discretecontinuous']
+		if len(newname) > 50 or len(newname) < 3:
+			issues.append("name_length")
+		if re.match('^\w+$', newname) is None and len(newname) != 0:
+			issues.append("name_char")
+
+		if len(issues) == 0:
+			#Create the table type to help with graphing later
+			print(quanqual)
+			print(discretecontinuous)
+			if quanqual == "qualitative":
+				tabletype = "qualitative"
+			elif quanqual == "quantitative" and discretecontinuous == "discrete":
+				tabletype = "quantitative_discrete"
+			elif quanqual == "quantitative" and discretecontinuous == "continuous":
+				tabletype = "quantitative_continuous"
+			else:
+				print('Critical error')
+				return
+			#Create the table
+			print("creating new table")
+			db_interface.createTable(projectname, newname, tabletype)
+			return HttpResponseRedirect('/log/%s/%s/' % (projectname, newname))
+	else:
+		first = True
+
+	tables = db_interface.gettables(projectname)
+	if len(tables) == 0:
+		raise Http404("Project does not exist.")
+	else:
+		projectfile = db_interface.getProject(projectname)
+		revisedtables = []
+		#Cut off x characters from tablename to display
+		#x = length of project name and the hyphen
+		length = len(projectname) + 1
+		for table in tables:
+			revisedtables.append(table[length:])
+
+		#TODO: Make a webpage that is a complete list of all the user's recently viewed projects,
+		#owned projects, and a project search bar 
+
+		context = {
+			'specific_project' : projectname, 
+			'project_description' : projectfile['description'],
+			'project_funds' : projectfile['usd_cents'],
+			'project_access' : projectfile['access'],
+			'project_free_logs' : projectfile['free_logs'],
+			'project_date_created' : projectfile['datecreated'],
+			'secret_key' : projectfile['secret_key'],
+			'tablelist' : revisedtables,
+			'username' : user,
+			'first' : first,
+			'newname' : newname,
+			'quanqual' : quanqual,
+			'discretecontinuous' : discretecontinuous,
+			'issues' : issues,
+			'projectlist' : projectlist,
+			'myproject' : myproject,
+		}
+
+		return render(request, "tablemanager/project_details.html", context)
+
+#Login is required to view this page
 def user_page(request):
 	username = request.user.get_username()
 

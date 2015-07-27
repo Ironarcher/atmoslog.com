@@ -1,0 +1,25 @@
+{% extends "tables.html" %}
+
+{% block inside %}
+<div class="panel panel-default">
+	<div class="panel-heading">Viewing table:<strong> {{ specific_table }} </strong></div>
+	<div class="panel-body">
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>Last 20 Logs:</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for log in logs %}
+					<tr>
+						<td>{{ log }}</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		<h4>Statistics</h4>
+		<p>Amount of logs: {{ logcount }}</p>
+	</div>
+</div>
+{% endblock %}
