@@ -5,16 +5,25 @@
 	<div class="panel-heading">Project details</div>
 		<div class="panel-body">
 			<ul class="nav nav-pills">
-			  <li role="presentation" class="active"><a href="#">Home</a></li>
-			  <li role="presentation"><a href="#">Add funds</a></li>
+			  <li role="presentation" class="active"><a href="#details" data-toggle="pill">Details</a></li>
+			  <li role="presentation"><a href="#funds" data-toggle="pill">Funds</a></li>
 			</ul>
-			<p>Name: {{ specific_project }}</p>
-			<p>Description: {{ project_description }}</p>
-			<p>Funds Remaining: {{ project_funds }}</p>
-			<p>Access: {{ project_access }}</p>
-			<p>Free Logs Remaining: {{ project_free_logs }}</p>
-			<p>Created: {{ project_date_created }}</p>
-			<p>Secret Key: {{ secret_key }}</p>
+		</br>
+			<div class="tab-content">
+				<div id="details" class="tab-pane fade in active">
+					<p><strong>Name: </strong>{{ specific_project }}</p>
+					<p><strong>Description: </strong>{{ project_description }}</p>
+					<p><strong>Funds Remaining: </strong>{{ project_funds }}</p>
+					<p><strong>Access: </strong>{{ project_access }}</p>
+					<p><strong>Free Logs Remaining: </strong>{{ project_free_logs }}</p>
+					<p><strong>Created: </strong>{{ project_date_created }}</p>
+					<p><strong>Secret Key: </strong>{{ secret_key }}</p>
+				</div>
+
+				<div id="funds" class="tab-pane fade in active">
+					<h3 class="text-center">
+				</div>
+			</div>
 		</div>
 	</div>
 </div>

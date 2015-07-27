@@ -26,9 +26,9 @@ hr{
 
 {% block script%}
 
-	{% if first %}
-	document.ready(function(){
-		$('#createTable').modal({});
+	{% if not first %}
+	$(window).ready(function(){
+		$('#createTable').modal('show');
 	});
 	{% endif %} 
 

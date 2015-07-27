@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 import db_interface
 
 import re
+import time
 
 def index(request):
 	#For navbar control
@@ -125,8 +126,11 @@ def login_view(request):
 			if user.is_active:
 				login(request, user)
 				status = "success"
-				#if request.POST.get('remember_me', None) is None:
-				#	request.session.set_expiry(0)
+				#TODO: Still not working (request.session.set_expiry)
+				#is not closing the session
+				remember = request.POST.getlist('remember')
+				if "remember" not in remember:
+					request.session.set_expiry(0)
 				#if next.startswith("tables-"):
 				#	parts = next.split("-")
 				#	return HttpResponseRedirect("/log/%s/%s/" % (parts[1], parts[2]))
@@ -221,7 +225,11 @@ def create(request):
 		description = request.POST['description']
 		creator = request.user.get_username()
 		#TODO: fix the access (can only be private for some reason)
-		access = request.POST.get('public', 'public')
+		access = request.POST.getlist('public')
+		if "public" in access:
+			access_final = "public"
+		else:
+			access_final = "private"
 		print(access)
 		if len(name) < 4 or len(name) > 50:
 			#Project name must be 4-50 characters long.
@@ -242,7 +250,7 @@ def create(request):
 				access_real = 'public'
 			else:
 				access_real = 'private'
-			db_interface.createProject(name, creator, access, description)
+			db_interface.createProject(name, creator, access_final, description)
 			return HttpResponseRedirect('/log/%s' % name)
 	else:
 		first = True
@@ -332,10 +340,10 @@ def project_settings(request, projectname):
 		context = {
 			'specific_project' : projectname, 
 			'project_description' : projectfile['description'],
-			'project_funds' : projectfile['usd_cents'],
+			'project_funds' : centsToUSD(projectfile['usd_cents']),
 			'project_access' : projectfile['access'],
 			'project_free_logs' : projectfile['free_logs'],
-			'project_date_created' : projectfile['datecreated'],
+			'project_date_created' : timeSince(projectfile['datecreated']),
 			'secret_key' : projectfile['secret_key'],
 			'tablelist' : revisedtables,
 			'username' : user,
@@ -361,4 +369,35 @@ def check_user_exists(username):
 		return True
 	else:
 		return False
+
+def centsToUSD(cents):
+	dollars = str(cents/100.00)
+	#For example: 3410 returns 34.1 not 34.10
+	verify = dollars.split(".")
+	if len(verify[1]) == 1:
+		dollars = dollars + "0"
+
+	return "$" + dollars
+
+def timeSince(unixtime):
+	diff = int(time.time()) - unixtime
+	if diff < 60:
+		#seconds
+		return "%s seconds ago" % str(diff)
+	elif diff < 3600:
+		#minutes
+		return "%s minutes ago" % str(diff/60)
+	elif diff < 86400:
+		#hours
+		return "%s hours ago" % str(diff/3600)
+	elif diff < 2626560:
+		#days with 30.4 days in a month average
+		return "%s days ago" % str(diff/86400)
+	elif diff < 31518720:
+		#months 
+		return "%s months ago" % str(diff/2626560)
+	else:
+		#years
+		return "%s years ago" % str(diff/31518720)
+
 

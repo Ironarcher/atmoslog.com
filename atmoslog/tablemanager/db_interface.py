@@ -155,7 +155,7 @@ def gettables(project):
 	query = db.collection_names(include_system_collections=False)
 	results = []
 	for table in query:
-		if table.startswith(project) and table not in tableBlacklist:
+		if table.split("-")[0] == project and table not in tableBlacklist:
 			#If the table starts with the project and
 			#is not in the blacklist, add it to the returned list
 			results.append(table)
