@@ -46,9 +46,7 @@ def projectlog(request, projectname, tablename):
 	issues = []
 	newname = quanqual = discretecontinuous = ""
 	if request.method == "POST":
-		if request.POST['formtype'] == "create_table":
 			first = False
-			edit_first = True
 			newname = request.POST['name']
 			quanqual = request.POST['quanqual']
 			if len(newname) > 50 or len(newname) < 3:
@@ -60,14 +58,9 @@ def projectlog(request, projectname, tablename):
 				#Create the table type to help with graphing later
 				db_interface.createTable(projectname, newname, quanqual)
 				return HttpResponseRedirect('/log/%s/%s/' % (projectname, newname))
-		elif request.POST['formtype'] == 'edit_project':
-			first = True
-			edit_first = False
 	else:
 		quanqual = db_interface.getTabletypeDefault(projectname)
 		first = True
-		edit_first = True
-
 
 	tables = db_interface.gettables(projectname)
 	if len(tables) == 0:
@@ -284,60 +277,105 @@ def project_settings(request, projectname):
 	else:
 		return HttpResponseRedirect('/login/tables-%s-%s/' % (projectname, tablename))
 
-	issues = []
-	newname = quanqual = discretecontinuous = ""
-	if request.method == "POST":
-		first = False
-		newname = request.POST['name']
-		quanqual = request.POST['quanqual']
-		if len(newname) > 50 or len(newname) < 3:
-			issues.append("name_length")
-		if re.match('^\w+$', newname) is None and len(newname) != 0:
-			issues.append("name_char")
-
-		if len(issues) == 0:
-			#Create the table type to help with graphing later
-			db_interface.createTable(projectname, newname, quanqual)
-			return HttpResponseRedirect('/log/%s/%s/' % (projectname, newname))
-	else:
-		quanqual = db_interface.getTabletypeDefault(projectname)
-		first = True
-
+	#Verify that project exists
 	tables = db_interface.gettables(projectname)
 	if len(tables) == 0:
 		raise Http404("Project does not exist.")
 	else:
 		projectfile = db_interface.getProject(projectname)
-		revisedtables = []
-		#Cut off x characters from tablename to display
-		#x = length of project name and the hyphen
-		length = len(projectname) + 1
-		for table in tables:
-			revisedtables.append(table[length:])
 
-		#TODO: Make a webpage that is a complete list of all the user's recently viewed projects,
-		#owned projects, and a project search bar 
+	#Verify post results and handle forms
+	issues = []
+	issues2 = []
+	newname = quanqual = discretecontinuous = ""
+	edit_name = projectname
+	edit_description = projectfile['description']
+	edit_access_final = projectfile['access']
+	edit_default_tabletype = projectfile['default_tabletype']
+	if request.method == "POST":
+		if request.POST['formtype'] == 'create_table':
+			edit_first = True
+			first = False
+			newname = request.POST['name']
+			quanqual = request.POST['quanqual']
+			if len(newname) > 50 or len(newname) < 3:
+				issues.append("name_length")
+			if re.match('^\w+$', newname) is None and len(newname) != 0:
+				issues.append("name_char")
 
-		context = {
-			'specific_project' : projectname, 
-			'project_description' : projectfile['description'],
-			'project_funds' : centsToUSD(projectfile['usd_cents']),
-			'project_access' : projectfile['access'],
-			'project_free_logs' : projectfile['free_logs'],
-			'project_date_created' : timeSince(projectfile['datecreated']),
-			'secret_key' : projectfile['secret_key'],
-			'tablelist' : revisedtables,
-			'username' : user,
-			'first' : first,
-			'newname' : newname,
-			'quanqual' : quanqual,
-			'discretecontinuous' : discretecontinuous,
-			'issues' : issues,
-			'projectlist' : projectlist,
-			'myproject' : myproject,
-		}
+			if len(issues) == 0:
+				#Create the table type to help with graphing later
+				db_interface.createTable(projectname, newname, quanqual)
+				return HttpResponseRedirect('/log/%s/%s/' % (projectname, newname))
+		elif request.POST['formtype'] == 'edit_project':
+			first = True
+			edit_first = False
+			edit_name = request.POST['edit_name']
+			edit_description = request.POST['edit_description']
+			edit_access = request.POST.getlist('edit_access')
+			edit_default_tabletype = request.POST['edit_default_tabletype']
 
-		return render(request, "tablemanager/project_details.html", context)
+			if len(edit_name) < 4 or len(edit_name) > 50:
+				#Project name must be 4-50 characters long.
+				issues2.append("name_length")
+			if re.match('^\w+$', edit_name) is None and len(edit_name) != 0:
+				#Project name can only contain characters and numbers and underscores.
+				issues2.append("name_char")
+			if len(edit_description) > 500:
+				#Description is optional
+				#If description must be under 500 characters long.
+				issues2.append("description_length")
+			if db_interface.checkProjectExists(edit_name):
+				issues2.append("name_taken")
+
+			#Update the project:
+			if len(issues) == 0:
+				if "public" in edit_access:
+					edit_access_final = "public"
+				else:
+					edit_access_final = "private"
+				db_interface.updateProject(edit_name, edit_access_final, edit_description, edit_default_tabletype)
+	else:
+		quanqual = db_interface.getTabletypeDefault(projectname)
+		first = True
+		edit_first = True
+
+	revisedtables = []
+	#Cut off x characters from tablename to display
+	#x = length of project name and the hyphen
+	length = len(projectname) + 1
+	for table in tables:
+		revisedtables.append(table[length:])
+
+	#TODO: Make a webpage that is a complete list of all the user's recently viewed projects,
+	#owned projects, and a project search bar 
+
+	context = {
+		'specific_project' : projectname, 
+		'project_description' : projectfile['description'],
+		'project_funds' : centsToUSD(projectfile['usd_cents']),
+		'project_access' : projectfile['access'],
+		'project_free_logs' : projectfile['free_logs'],
+		'project_date_created' : timeSince(projectfile['datecreated']),
+		'secret_key' : projectfile['secret_key'],
+		'tablelist' : revisedtables,
+		'username' : user,
+		'first' : first,
+		'edit_first' : edit_first,
+		'newname' : newname,
+		'quanqual' : quanqual,
+		'discretecontinuous' : discretecontinuous,
+		'edit_name': edit_name,
+		'edit_description' : edit_description,
+		'edit_access' : edit_access_final,
+		'edit_default_tabletype' : edit_default_tabletype,
+		'issues' : issues,
+		'issues2' : issues2,
+		'projectlist' : projectlist,
+		'myproject' : myproject,
+	}
+
+	return render(request, "tablemanager/project_details.html", context)
 
 #Login is required to view this page
 def user_page(request):
@@ -364,43 +402,43 @@ def timeSince(unixtime):
 	diff = int(time.time()) - unixtime
 	if diff < 60:
 		#seconds
-		time = str(diff)
-		if time == "1":
+		t = str(diff)
+		if t == "1":
 			return "1 second ago"
 		else:
 			return "%s seconds ago" % str(diff)
 	elif diff < 3600:
 		#minutes
-		time = str(diff/60)
-		if time == "1":
+		t = str(diff/60)
+		if t == "1":
 			return "1 minute ago"
 		else:
 			return "%s minutes ago" % str(diff/60)
 	elif diff < 86400:
 		#hours
-		time = str(diff/3600)
-		if time == "1":
+		t = str(diff/3600)
+		if t == "1":
 			return "1 hour ago"
 		else:
 			return "%s hours ago" % str(diff/3600)
 	elif diff < 2626560:
 		#days with 30.4 days in a month average
-		time = str(diff/86400)
-		if time == "1":
+		t = str(diff/86400)
+		if t == "1":
 			return "1 day ago"
 		else:
 			return "%s days ago" % str(diff/86400)
 	elif diff < 31518720:
 		#months 
-		time = str(diff/2626560)
-		if time == "1":
+		t = str(diff/2626560)
+		if t == "1":
 			return "1 month ago"
 		else:
 			return "%s months ago" % str(diff/2626560)
 	else:
 		#years
-		time = str(diff/31518720)
-		if time == "1":
+		t = str(diff/31518720)
+		if t == "1":
 			return "1 year ago"
 		else:
 			return "%s years ago" % str(diff/31518720)

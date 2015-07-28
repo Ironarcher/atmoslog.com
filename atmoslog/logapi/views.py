@@ -19,15 +19,23 @@ def weblog(apikey, tablename, log):
 		if db_interface.checkTableExists(project_name, tablename) is False:
 			result['error'] = "incorrect table name"
 		else:
-			db_interface.log(project_name, tablename, log)
+			status = db_interface.getProjectStatus(project_name)
+			if status == "overdrawn":
+				result['error'] = "project overdrawn (add funds)"
+			elif status == "stopped":
+				result['error'] = "project stopped by user"
+			elif status == 'running':
+				db_interface.log(project_name, tablename, log)
 
-			#Charge the project
-			charge = db_interface.chargeProject(project_name, 1)
-			if charge is None:
-				result['error'] = "Logged but failed to charge"
+				#Charge the project
+				charge = db_interface.chargeProject(project_name, 1)
+				if charge == "failure":
+					result['error'] = "logged but failed to charge"
+				else:
+					#Return success
+					result['error'] = ""
 			else:
-				#Return success
-				result['error'] = ""
+				result['error'] = "processing error"
 
 	if result['error'] == "":
 		result['log'] = log
@@ -41,8 +49,6 @@ def weblog(apikey, tablename, log):
 		result['free_logs_left'] = ""
 	return result
 
-#TODO: Check status before charging
-#TODO: Charge user who is calling
 #TODO: Test AJAX
 #Example: atmoslog.com/api/log/12345678901234567890/exampletable/examplelog/
 def log_view(request, apikey, tablename, log):

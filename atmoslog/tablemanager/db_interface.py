@@ -21,7 +21,7 @@ def createTable(ownerproject, tablename, tabletype):
 	elif len(tablename) > maximumlength:
 		print('Maximum length of the table name is 50 characters.')
 		return
-	if tabletype != "qualitative" and tabletype != "quantitative_discrete" and tabletype != "quantitative_continuous":
+	elif tabletype != "qualitative" and tabletype != "quantitative_discrete" and tabletype != "quantitative_continuous":
 		print('Tabletype incorrect')
 		return
 
@@ -74,7 +74,7 @@ def createProject(name, creator, access, description):
 			   "readers" : [creator],
 			   "access" : access,
 			   "secret_key" : key,
-			   "usd_cents" : 0,
+			   "usd_cents" : 0.0,
 			   "unpaid_logs" : 0,
 			   "free_logs" : 100000,
 			   "total_logs" : 0,
@@ -90,6 +90,21 @@ def createProject(name, creator, access, description):
 	else:
 		print("Error: Project name already exists. Choose a different name.")
 
+def updateProject(name, access, description, default_tabletype):
+	if re.match('^\w+$', name) is None:
+		print('Only alphanumeric characters and underscores can be included in the project name.')
+		return
+	elif len(name) > maximumlength:
+		print('Maximum length of the project name is 50 characters.')
+		return
+	elif default_tabletype != "qualitative" and default_tabletype != "quantitative_discrete" and default_tabletype != "quantitative_continuous":
+		print('Tabletype incorrect')
+		return 
+
+	projects = db['projects']
+	projects.update({"name" : name}, {"$set" : {"name" : name, "access" : access,
+		"description" : description, "default_tabletype": default_tabletype}})
+
 def chargeProject(project, amt):
 	projects = db['projects']
 	projectfile = projects.find_one({"name" : project})
@@ -97,16 +112,19 @@ def chargeProject(project, amt):
 		free = projectfile['free_logs']
 		#Take away from free logs if they still exist
 		if free > 0:
-			#Update to subtract amt from free logs
-			return(free)
+			if amt >= free:
+				amtToSub = free
+				projects.update({"name" : project}, {"$inc":{"unpaid_logs" : amt - amtToSub}})
+				return 0
+			else:
+				amtToSub = amt
+				projects.update({"name" : project}, {"$inc":{"free_logs" : -amtToSub}})
+				return free
 		else:
-			pass
-			#Update to add one to unpaid_logs
+			projects.update({"name" : project}, {"$inc":{"unpaid_logs" : amt}})
+			return 0
 	else:
 		return None
-	#Update the project file to subtract one from free_logs. If there are none in free_logs, charge from paid_logs
-	#Also check if in debt, from 0 to -100, show warning on the table dashboard, from -100 down, deny logging
-	#Remember to reset to 10k free_logs atleast a month, converted to seconds, after the datecreated
 
 def checkProjectExists(name):
 	projects = db['projects']
@@ -123,8 +141,9 @@ def log(project, table, value):
 		log = {"type" : "log",
 			   "value" : value,
 			   "datetime" : int(time.time())}
-		#TODO: Add one to total_logs on project
 		db[name].insert_one(log)
+		projectlist = db['projects']
+		projectlist.update({"name" : project}, {"$inc" : {"total_logs" : 1}})
 	else:
 		print('Cannot log because project or table name is not valid.')
 
@@ -207,3 +226,8 @@ def getTabletypeDefault(name):
 	projects = db['projects']
 	projectfile = projects.find_one({"name" : name})
 	return projectfile['default_tabletype']
+
+def getProjectStatus(project):
+	projects = db['projects']
+	projectfile = projects.find_one({"name" : project})
+	return projectfile['status']
