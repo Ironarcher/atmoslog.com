@@ -73,6 +73,7 @@ hr{
 	                {% endif %}
 	                </div>
 	                <p class="text-centered">Data Type:</p>
+
 	                <div class="radio">
 					  <label>
 					    <input type="radio" name="quanqual" id="qualitative" value="qualitative" {% if quanqual == "qualitative" %}checked{% endif %}>
@@ -81,25 +82,18 @@ hr{
 					</div>
 					<div class="radio">
 					  <label>
-					    <input type="radio" name="quanqual" id="quantitative" value="quantitative" {% if quanqual == "quantitative" %}checked{% endif %}>
-					    Quantitative data (Numbered data)
-					  </label>
-					</div>
-
-					<div class="radio">
-					  <label>
-					    <input type="radio" name="discretecontinuous" id="discrete" value="discrete" checked>
-					    Discrete (1, 2, 3, 4, 5)
+					    <input type="radio" name="quanqual" id="quantitative_discrete" value="quantitative_discrete" {% if quanqual == "quantitative_discrete" %}checked{% endif %}>
+					    Quantitative, discrete data (Numbered data with individual integers like ratings from 1 to 10)
 					  </label>
 					</div>
 					<div class="radio">
 					  <label>
-					    <input type="radio" name="discretecontinuous" id="continuous" value="continuous" checked>
-					    Continuous (1.11, 2.76, to fit into 1-2, 2-3)
+					    <input type="radio" name="quanqual" id="quantitative_continuous" value="quantitative_continuous" {% if quanqual == "quantitative_continuous" %}checked{% endif %}>
+					    Quantitative, continuous data (Numbered data with ranges of numbers like house prices)
 					  </label>
 					</div>
-					<input type="hidden" name="next" value="{{ next }}" />
 		     		<button type="submit" value="login" class="btn btn-default">Create</button>
+		     		<input type="hidden" name="formtype" value="create_table" />
 		     	</form>
 		      </div>
 		      <div class="modal-footer">

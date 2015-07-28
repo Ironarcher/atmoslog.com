@@ -21,7 +21,7 @@ def createTable(ownerproject, tablename, tabletype):
 	elif len(tablename) > maximumlength:
 		print('Maximum length of the table name is 50 characters.')
 		return
-	if tabletype is not "qualitative" and tabletype is not "quantitative_discrete" and tabletype is not "quantitative_continuous":
+	if tabletype != "qualitative" and tabletype != "quantitative_discrete" and tabletype != "quantitative_continuous":
 		print('Tabletype incorrect')
 		return
 
@@ -51,6 +51,7 @@ def createTable(ownerproject, tablename, tabletype):
 		print("Error: Owner proejct does not exist")
 
 #Access setting: Either public or private
+#Status setting: running, overdrawn, stopped
 def createProject(name, creator, access, description):
 	if re.match('^\w+$', name) is None:
 		print('Only alphanumeric characters and underscores can be included in the project name.')
@@ -76,6 +77,10 @@ def createProject(name, creator, access, description):
 			   "usd_cents" : 0,
 			   "unpaid_logs" : 0,
 			   "free_logs" : 100000,
+			   "total_logs" : 0,
+			   "status" : "running",
+			   "popularity" : 0,
+			   "default_tabletype" : "qualitative",
 			   "datecreated" : int(time.time()),
 			   "last_added_free_logs" : int(time.time())}
 		projects.insert_one(doc)
@@ -118,6 +123,7 @@ def log(project, table, value):
 		log = {"type" : "log",
 			   "value" : value,
 			   "datetime" : int(time.time())}
+		#TODO: Add one to total_logs on project
 		db[name].insert_one(log)
 	else:
 		print('Cannot log because project or table name is not valid.')
@@ -196,3 +202,8 @@ def getProject(name):
 	projects = db['projects']
 	projectfile = projects.find_one({"name" : name})
 	return projectfile
+
+def getTabletypeDefault(name):
+	projects = db['projects']
+	projectfile = projects.find_one({"name" : name})
+	return projectfile['default_tabletype']

@@ -10,24 +10,54 @@ def index_view(request):
 def testview(request, apikey):
 	return HttpResponse("working")
 
-def log_view(request, apikey, tablename, log):
+def weblog(apikey, tablename, log):
+	result = {}
 	if db_interface.getProjectFromKey(apikey) is None:
-		return HttpResponse("failure: incorrect api key")
+		result['error'] = "incorrect api key"
 	else:
 		project_name = db_interface.getProjectFromKey(apikey)
 		if db_interface.checkTableExists(project_name, tablename) is False:
-			return HttpResponse("failure: incorrect table name")
+			result['error'] = "incorrect table name"
 		else:
-			project_name = db_interface.getProjectFromKey(apikey)
-
 			db_interface.log(project_name, tablename, log)
 
 			#Charge the project
 			charge = db_interface.chargeProject(project_name, 1)
 			if charge is None:
-				return HttpResponse("Logged but failed to charge")
+				result['error'] = "Logged but failed to charge"
 			else:
 				#Return success
-				return HttpResponse("Logged %s to Project: %s and Table: %s. %s Free logs remain." % (
-					log, project_name, tablename, charge))
+				result['error'] = ""
+
+	if result['error'] == "":
+		result['log'] = log
+		result['project_name'] = project_name
+		result['table_name'] = tablename
+		result['free_logs_left'] = charge
+	else:
+		result['log'] = ""
+		result['project_name'] = ""
+		result['table_name'] = ""
+		result['free_logs_left'] = ""
+	return result
+
+#TODO: Check status before charging
+#TODO: Charge user who is calling
+#TODO: Test AJAX
+#Example: atmoslog.com/api/log/12345678901234567890/exampletable/examplelog/
+def log_view(request, apikey, tablename, log):
+	return JsonResponse(weblog(apikey, tablename, log))
+
+#Example: atmoslog.com/api/status/12345678901234567890/
+def status_view(request, apikey):
+	pass
+
+#Example: atmoslog.com/api/createtable/12345678901234567890/exampletable
+def createtable_view(request, apikey, tablename):
+	pass
+
+#Example: atmoslog.com/api/bulklog/12345678901234567890/exampletable/log1&log2&log3&log4!%><&
+#After splitting by '&', convert '!%><' to '&'
+def bulklog_view(request, apikey, tablename, log):
+	pass
 

@@ -46,34 +46,28 @@ def projectlog(request, projectname, tablename):
 	issues = []
 	newname = quanqual = discretecontinuous = ""
 	if request.method == "POST":
-		first = False
-		newname = request.POST['name']
-		quanqual = request.POST['quanqual']
-		discretecontinuous = request.POST['discretecontinuous']
-		if len(newname) > 50 or len(newname) < 3:
-			issues.append("name_length")
-		if re.match('^\w+$', newname) is None and len(newname) != 0:
-			issues.append("name_char")
+		if request.POST['formtype'] == "create_table":
+			first = False
+			edit_first = True
+			newname = request.POST['name']
+			quanqual = request.POST['quanqual']
+			if len(newname) > 50 or len(newname) < 3:
+				issues.append("name_length")
+			if re.match('^\w+$', newname) is None and len(newname) != 0:
+				issues.append("name_char")
 
-		if len(issues) == 0:
-			#Create the table type to help with graphing later
-			print(quanqual)
-			print(discretecontinuous)
-			if quanqual == "qualitative":
-				tabletype = "qualitative"
-			elif quanqual == "quantitative" and discretecontinuous == "discrete":
-				tabletype = "quantitative_discrete"
-			elif quanqual == "quantitative" and discretecontinuous == "continuous":
-				tabletype = "quantitative_continuous"
-			else:
-				print('Critical error')
-				return
-			#Create the table
-			print("creating new table")
-			db_interface.createTable(projectname, newname, tabletype)
-			return HttpResponseRedirect('/log/%s/%s/' % (projectname, newname))
+			if len(issues) == 0:
+				#Create the table type to help with graphing later
+				db_interface.createTable(projectname, newname, quanqual)
+				return HttpResponseRedirect('/log/%s/%s/' % (projectname, newname))
+		elif request.POST['formtype'] == 'edit_project':
+			first = True
+			edit_first = False
 	else:
+		quanqual = db_interface.getTabletypeDefault(projectname)
 		first = True
+		edit_first = True
+
 
 	tables = db_interface.gettables(projectname)
 	if len(tables) == 0:
@@ -296,7 +290,6 @@ def project_settings(request, projectname):
 		first = False
 		newname = request.POST['name']
 		quanqual = request.POST['quanqual']
-		discretecontinuous = request.POST['discretecontinuous']
 		if len(newname) > 50 or len(newname) < 3:
 			issues.append("name_length")
 		if re.match('^\w+$', newname) is None and len(newname) != 0:
@@ -304,22 +297,10 @@ def project_settings(request, projectname):
 
 		if len(issues) == 0:
 			#Create the table type to help with graphing later
-			print(quanqual)
-			print(discretecontinuous)
-			if quanqual == "qualitative":
-				tabletype = "qualitative"
-			elif quanqual == "quantitative" and discretecontinuous == "discrete":
-				tabletype = "quantitative_discrete"
-			elif quanqual == "quantitative" and discretecontinuous == "continuous":
-				tabletype = "quantitative_continuous"
-			else:
-				print('Critical error')
-				return
-			#Create the table
-			print("creating new table")
-			db_interface.createTable(projectname, newname, tabletype)
+			db_interface.createTable(projectname, newname, quanqual)
 			return HttpResponseRedirect('/log/%s/%s/' % (projectname, newname))
 	else:
+		quanqual = db_interface.getTabletypeDefault(projectname)
 		first = True
 
 	tables = db_interface.gettables(projectname)
@@ -383,21 +364,57 @@ def timeSince(unixtime):
 	diff = int(time.time()) - unixtime
 	if diff < 60:
 		#seconds
-		return "%s seconds ago" % str(diff)
+		time = str(diff)
+		if time == "1":
+			return "1 second ago"
+		else:
+			return "%s seconds ago" % str(diff)
 	elif diff < 3600:
 		#minutes
-		return "%s minutes ago" % str(diff/60)
+		time = str(diff/60)
+		if time == "1":
+			return "1 minute ago"
+		else:
+			return "%s minutes ago" % str(diff/60)
 	elif diff < 86400:
 		#hours
-		return "%s hours ago" % str(diff/3600)
+		time = str(diff/3600)
+		if time == "1":
+			return "1 hour ago"
+		else:
+			return "%s hours ago" % str(diff/3600)
 	elif diff < 2626560:
 		#days with 30.4 days in a month average
-		return "%s days ago" % str(diff/86400)
+		time = str(diff/86400)
+		if time == "1":
+			return "1 day ago"
+		else:
+			return "%s days ago" % str(diff/86400)
 	elif diff < 31518720:
 		#months 
-		return "%s months ago" % str(diff/2626560)
+		time = str(diff/2626560)
+		if time == "1":
+			return "1 month ago"
+		else:
+			return "%s months ago" % str(diff/2626560)
 	else:
 		#years
-		return "%s years ago" % str(diff/31518720)
+		time = str(diff/31518720)
+		if time == "1":
+			return "1 year ago"
+		else:
+			return "%s years ago" % str(diff/31518720)
 
+def logsToCents(logs):
+	cents = 0
+	if logs > 100000000:
+		diff = logs - 100000000
+		cents = cents + ((logs-100000000) * 1.5 / 10000)
+		logs = logs - diff
+	if logs > 10000000:
+		diff = logs - 10000000
+		cents = cents + ((logs-10000000) * 3 / 10000)
+		logs = logs - diff
+	cents = cents + (logs * 6 / 10000)
+	return cents
 

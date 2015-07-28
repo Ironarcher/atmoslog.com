@@ -7,6 +7,7 @@
 			<ul class="nav nav-pills">
 			  <li role="presentation" class="active"><a href="#details" data-toggle="pill">Details</a></li>
 			  <li role="presentation"><a href="#funds" data-toggle="pill">Funds</a></li>
+			  <li role="presentation"><a href="#settings" data-toggle="pill">Settings</a></li>
 			</ul>
 		</br>
 			<div class="tab-content">
@@ -20,8 +21,39 @@
 					<p><strong>Secret Key: </strong>{{ secret_key }}</p>
 				</div>
 
-				<div id="funds" class="tab-pane fade in active">
-					<h3 class="text-center">
+				<div id="funds" class="tab-pane fade">
+					<h3 class="text-center">Add funds</h3>
+				</div>
+
+				<div id="settings" class="tab-pane fade">
+					<h3 class="text-center">Edit project</h3>
+					<div class="row">
+						<div class="col-md-6 col-md-offset-3">
+							<form method="post" action="/log/{{ specific_project }}/" role="form">
+				                {% csrf_token %}
+				                {% if "name_char" in issues%}
+				                    <div class="form-group has-error has-feedback">
+				                {% elif not edit_first %}
+				                    <div class="form-group has-success has-feedback">
+				                {% else %}
+				                    <div class="form-group">
+				                {% endif %}
+				                    <label for="project_name">Project Name</label>
+				                    <input type="text" class="form-control" id="project_name" name="project_name" value={{ project_name_init }}>
+				                {% if "name_char" in issues %}
+				                    <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+				                {% elif not edit_first %}
+				                    <span class="glyphicon glyphicon-ok form-control-feedback"></span>
+				                {% endif %}
+				                </div>
+
+				                <div class="centered">
+				                    <button type="submit" value="update" class="btn btn-default">Update</button>
+				                </div>
+				                <input type="hidden" name="formtype" value="edit_project" />
+				            </form>
+				        </div>
+				    </div>
 				</div>
 			</div>
 		</div>

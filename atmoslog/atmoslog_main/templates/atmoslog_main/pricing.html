@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Atmoslog: Pricing{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+	<div class="page-header">
+		<h2 class="text-center">Pricing</h2>
+	</div>
+
+	<div class="row">
+		<div class="col-md-4 col-md-offset-4">
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>Amount of Logs</th>
+						<th>Price (per 10k logs)</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>0 to 10 million</td>
+						<td>0.06¢</td>
+					</tr>
+					<tr>
+						<td>10 million to 100 million</td>
+						<td>0.03¢</td>
+					</tr>
+					<tr>
+						<td>100 million to 1 billion</td>
+						<td>0.015¢</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+{% endblock %}

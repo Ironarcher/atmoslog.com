@@ -51,6 +51,7 @@ def createTable(ownerproject, tablename, tabletype):
 		print("Error: Owner proejct does not exist")
 
 #Access setting: Either public or private
+#Status setting: running, overdrawn, stopped
 def createProject(name, creator, access, description):
 	if re.match('^\w+$', name) is None:
 		print('Only alphanumeric characters and underscores can be included in the project name.')
@@ -76,6 +77,9 @@ def createProject(name, creator, access, description):
 			   "usd_cents" : 0,
 			   "unpaid_logs" : 0,
 			   "free_logs" : 100000,
+			   "status" : "running",
+			   "popularity" : 0,
+			   "default_tabletype" : "qualitative",
 			   "datecreated" : int(time.time()),
 			   "last_added_free_logs" : int(time.time())}
 		projects.insert_one(doc)
@@ -196,3 +200,8 @@ def getProject(name):
 	projects = db['projects']
 	projectfile = projects.find_one({"name" : name})
 	return projectfile
+
+def getTabletypeDefault(name):
+	projects = db['projects']
+	projectfile = projects.find_one({"name" : name})
+	return projectfile['default_tabletype']
