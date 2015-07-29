@@ -83,7 +83,7 @@ def projectlog(request, projectname, tablename):
 			'specific_project' : projectname, 
 			'tablelist' : revisedtables,
 			'specific_table' : tablename,
-			'logs' : db_interface.findlogs(projectname, tablename, 20),
+			'logs' : db_interface.findlogs(projectname, tablename, 100),
 			'logcount' : db_interface.getlogcount(projectname, tablename),
 			'username' : user,
 			'first' : first,
@@ -275,7 +275,8 @@ def project_settings(request, projectname):
 				myproject = False
 
 	else:
-		return HttpResponseRedirect('/login/tables-%s-%s/' % (projectname, tablename))
+		#return HttpResponseRedirect('/login/tables-%s-%s/' % (projectname, tablename))
+		return HttpResponseRedirect('/login/')
 
 	#Verify that project exists
 	tables = db_interface.gettables(projectname)
@@ -312,8 +313,9 @@ def project_settings(request, projectname):
 			edit_first = False
 			edit_name = request.POST['edit_name']
 			edit_description = request.POST['edit_description']
-			edit_access = request.POST.getlist('edit_access')
-			edit_default_tabletype = request.POST['edit_default_tabletype']
+			edit_access = request.POST.getlist('acc2[]')
+			edit_default_tabletype = request.POST['edit_quanqual']
+			print(edit_default_tabletype)
 
 			if len(edit_name) < 4 or len(edit_name) > 50:
 				#Project name must be 4-50 characters long.
@@ -325,16 +327,18 @@ def project_settings(request, projectname):
 				#Description is optional
 				#If description must be under 500 characters long.
 				issues2.append("description_length")
-			if db_interface.checkProjectExists(edit_name):
+			if edit_name != projectname and db_interface.checkProjectExists(edit_name):
 				issues2.append("name_taken")
 
 			#Update the project:
-			if len(issues) == 0:
+			if len(issues2) == 0:
 				if "public" in edit_access:
 					edit_access_final = "public"
 				else:
 					edit_access_final = "private"
-				db_interface.updateProject(edit_name, edit_access_final, edit_description, edit_default_tabletype)
+				db_interface.updateProject(projectname, edit_name, edit_access_final,
+					edit_description, edit_default_tabletype)
+				return HttpResponseRedirect('/log/%s' % edit_name)
 	else:
 		quanqual = db_interface.getTabletypeDefault(projectname)
 		first = True
@@ -349,7 +353,8 @@ def project_settings(request, projectname):
 
 	#TODO: Make a webpage that is a complete list of all the user's recently viewed projects,
 	#owned projects, and a project search bar 
-
+	print("ALERT")
+	print(edit_access_final)
 	context = {
 		'specific_project' : projectname, 
 		'project_description' : projectfile['description'],
@@ -367,7 +372,7 @@ def project_settings(request, projectname):
 		'discretecontinuous' : discretecontinuous,
 		'edit_name': edit_name,
 		'edit_description' : edit_description,
-		'edit_access' : edit_access_final,
+		'edit_access_final' : edit_access_final,
 		'edit_default_tabletype' : edit_default_tabletype,
 		'issues' : issues,
 		'issues2' : issues2,

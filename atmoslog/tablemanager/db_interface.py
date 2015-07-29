@@ -90,7 +90,7 @@ def createProject(name, creator, access, description):
 	else:
 		print("Error: Project name already exists. Choose a different name.")
 
-def updateProject(name, access, description, default_tabletype):
+def updateProject(oldname, name, access, description, default_tabletype):
 	if re.match('^\w+$', name) is None:
 		print('Only alphanumeric characters and underscores can be included in the project name.')
 		return
@@ -102,8 +102,17 @@ def updateProject(name, access, description, default_tabletype):
 		return 
 
 	projects = db['projects']
-	projects.update({"name" : name}, {"$set" : {"name" : name, "access" : access,
+	projects.update({"name" : oldname}, {"$set" : {"name" : name, "access" : access,
 		"description" : description, "default_tabletype": default_tabletype}})
+
+	if oldname != name:
+		query = db.collection_names(include_system_collections=False)
+		for table in query:
+			spl = table.split("-")
+			if spl[0] == oldname and table not in tableBlacklist:
+				newtablename = name + "-" + spl[1]
+				print(table)
+				db[table].rename(newtablename)
 
 def chargeProject(project, amt):
 	projects = db['projects']

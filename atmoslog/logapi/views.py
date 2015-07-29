@@ -60,7 +60,29 @@ def status_view(request, apikey):
 
 #Example: atmoslog.com/api/createtable/12345678901234567890/exampletable
 def createtable_view(request, apikey, tablename):
-	pass
+	result = {}
+	if db_interface.getProjectFromKey(apikey) is None:
+		result['error'] = "incorrect api key"
+	else:
+		project_name = db_interface.getProjectFromKey(apikey)
+		if db_interface.checkTableExists(project_name, tablename) is True:
+			result['error'] = "table name already taken"
+		else:
+			default_tabletype = db_interface.getTabletypeDefault(project_name)
+			db_interface.createTable(project_name, tablename, default_tabletype)
+			result['error'] = ""
+			result['result'] = "success"
+			result['project_name'] = project_name
+			result['table_name'] = tablename
+			result['table_type'] = default_tabletype
+			return JsonResponse(result)
+
+	#Indicates failure
+	result['result'] = "failure"
+	result['project_name'] = ""
+	result['table_name'] = ""
+	result['table_type'] = ""
+	return JsonResponse(result)
 
 #Example: atmoslog.com/api/bulklog/12345678901234567890/exampletable/log1&log2&log3&log4!%><&
 #After splitting by '&', convert '!%><' to '&'

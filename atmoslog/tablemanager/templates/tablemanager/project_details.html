@@ -29,27 +29,27 @@
 					<h3 class="text-center">Edit project</h3>
 					<div class="row">
 						<div class="col-md-6 col-md-offset-3">
-							{% if "name_length" in issues%}
+							{% if "name_length" in issues2%}
 					            <div class="alert alert-warning">
 					                <p class="text-center">The project name must be between 4 and 50 characters.</p>
 					            </div>
 					        {% endif %}
-					        {% if "name_char" in issues%}
+					        {% if "name_char" in issues2%}
 					            <div class="alert alert-warning">
 					               <p class="text-center">The project name can only contain alphanumeric characters and underscores.</p>
 					            </div>
 					        {% endif %}
-					        {% if "description_length" in issues%}
+					        {% if "description_length" in issues2%}
 					            <div class="alert alert-warning">
 					               <p class="text-center">The project description must be less than 500 characters.</p>
 					            </div>
 					        {% endif %}
-					        {% if "name_taken" in issues%}
+					        {% if "name_taken" in issues2%}
 					            <div class="alert alert-warning">
-					               <p class="text-center">A project with this name already exists.</p>
+					               <p class="text-center">This project name already exists.</p>
 					            </div>
 					        {% endif %}
-					        
+
 							<form method="post" action="/log/{{ specific_project }}/" role="form">
 				                {% csrf_token %}
 				                {% if "name_char" in issues2 or "name_length" in issues2 or "name_taken" in issues2 %}
@@ -85,24 +85,27 @@
 				                </div>
 
 				                <div class="checkbox">
-				                    <label><input id="edit_access" name="edit_access[]" value="public" type="checkbox" {% if edit_access == "public" %}checked{% endif %}>Public?</label>
+				                    <label><input id="acc2" name="acc2[]" value="public" type="checkbox" {% if edit_access_final == "public" %}checked{% endif %}>Public?</label>
 				                </div>
 
-				                <select class="form-control">
-				                	{% if edit_default_tabletype == "qualitative" %}
-				                		<option>Qualitative</option>
-				                		<option>Quantitative Discrete</option>
-				                		<option>Quantitative Continuous</option>
-				                	{% elif edit_default_tabletype == "quantitative_discrete %"}
-				                		<option>Quantitative Discrete</option>
-				                		<option>Quantitative Continuous</option>
-				                		<option>Qualitative</option>
-				                	{% elif edit_default_tabletype == "quantitative_continuous %"}
-				                		<option>Quantitative Continuous</option>
-				                		<option>Qualitative</option>
-				                		<option>Quantitative Discrete</option>
-				                	{% endif %}
-				                </select>
+				                <div class="form-group">
+				                	<label for"edit_quanqual">Default Table Type:</label>
+					                <select class="form-control" id="edit_quanqual" name="edit_quanqual" title="edit_quanqual">
+					                	{% if edit_default_tabletype == "qualitative" %}
+					                		<option value="qualitative">Qualitative</option>
+					                		<option value="quantitative_discrete">Quantitative Discrete</option>
+					                		<option value="quantitative_continuous">Quantitative Continuous</option>
+					                	{% elif edit_default_tabletype == "quantitative_discrete" %}
+					                		<option value="quantitative_discrete">Quantitative Discrete</option>
+					                		<option value="quantitative_continuous">Quantitative Continuous</option>
+					                		<option value="quanlitative">Qualitative</option>
+					                	{% elif edit_default_tabletype == "quantitative_continuous" %}
+					                		<option value="quantitative_continuous">Quantitative Continuous</option>
+					                		<option value="qualitative">Qualitative</option>
+					                		<option value="quantitative_discrete">Quantitative Discrete</option>
+					                	{% endif %}
+					                </select>
+				           		</div>
 
 				                <div class="text-center">
 				                    <button type="submit" value="update" class="btn btn-default">Update</button>

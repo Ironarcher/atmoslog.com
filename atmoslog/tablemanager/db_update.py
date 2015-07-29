@@ -1,14 +1,39 @@
 import time
+import threading
 
 import db_interface
 
+def setInterval(interval):
+	def decorator(function):
+		def wrapper(*args, **kwargs):
+			stopped = threading.Event()
+
+			def loop(): #Another thread
+				while not stopped.wait(interval): #until stopped
+					function(*args, **kwargs)
+
+			t = threading.Thread(target=loop)
+			t.daemon = true #Stops if the program exits
+			function(*args, **kwargs)
+			t.start()
+			return stopped
+		return wrapper
+	return decorator
+
+#Interval set for every 15 minutes: 900 seconds
+@setInterval(900)
 def updateDB():
 	#For all projects, if > 10,000 paid_logs, charge based on logcount
 	#For all projects, if time since last free log update > 30.4, refill to 100k
+	counter = 0
+	print("Starting global project update")
 	projects = db_interface.db['projects']
+	total = projects.count()
 
 	for project in projects.find():
+		counter++
 		updateProject(project['name'])
+		print("Updated %d project in set out of %d items" % (counter, total)
 
 def updateProject(projectname):
 	projects = db_interface.db['projects']
@@ -50,3 +75,5 @@ def getCharge(logs):
 	else:
 		return 1.5
 
+def start():
+	updateDB()
