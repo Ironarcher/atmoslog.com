@@ -21,7 +21,7 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^log/', include('tablemanager.urls')),
     #url(r'^about/', include('atmoslog_main.urls')),
-    #url(r'^docs/', include('atmoslog_docs.urls')),
+    url(r'^docs/', include('atmoslog_docs.urls')),
     url(r'^pricing/$', 'atmoslog_main.views.pricing'),
     url(r'^settings/$', 'tablemanager.views.settings'),
     url(r'^api/', include('logapi.urls')),

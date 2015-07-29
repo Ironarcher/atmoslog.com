@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block style %}
+
+.sidebartext{
+	font-color: grey;
+}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+	<div class="row">
+		<div class='col-md-3'>
+			<!-- Column for sidebar -->
+			<ul class="list-unstyled">
+				<li>Home</li>
+				</br>
+				<li>Getting started</li>
+			</ul>
+		</div>
+
+		<div class="col-md-9">
+			<!-- Column for documentation content -->
+			<div class="well">
+				{% block docs %}
+				
+				{% endblock %}
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
