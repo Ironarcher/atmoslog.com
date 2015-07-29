@@ -4,22 +4,24 @@
 <div class="panel panel-default">
 	<div class="panel-heading">Project details</div>
 		<div class="panel-body">
-			<ul class="nav nav-pills">
-			  <li role="presentation" class="active"><a href="#details" data-toggle="pill">Details</a></li>
-			  <li role="presentation"><a href="#funds" data-toggle="pill">Funds</a></li>
-			  <li role="presentation"><a href="#settings" data-toggle="pill">Settings</a></li>
-			</ul>
+			<div class="text-center">
+				<ul class="nav nav-pills">
+				  <li role="presentation" class="active"><a href="#details" data-toggle="pill">Details</a></li>
+				  <li role="presentation"><a href="#funds" data-toggle="pill">Funds</a></li>
+				  <li role="presentation"><a href="#settings" data-toggle="pill">Settings</a></li>
+				</ul>
+			</div>
 		</br>
-			<div class="tab-content">
-				<div id="details" class="tab-pane fade in active">
-					<p><strong>Name: </strong>{{ specific_project }}</p>
-					<p><strong>Description: </strong>{{ project_description }}</p>
-					<p><strong>Funds Remaining: </strong>{{ project_funds }}</p>
-					<p><strong>Access: </strong>{{ project_access }}</p>
-					<p><strong>Free Logs Remaining: </strong>{{ project_free_logs }}</p>
-					<p><strong>Created: </strong>{{ project_date_created }}</p>
-					<p><strong>Secret Key: </strong>{{ secret_key }}</p>
-				</div>
+				<div class="tab-content">
+					<div id="details" class="tab-pane fade in active">
+						<p><strong>Name: </strong>{{ specific_project }}</p>
+						<p><strong>Description: </strong>{{ project_description }}</p>
+						<p><strong>Funds Remaining: </strong>{{ project_funds }}</p>
+						<p><strong>Access: </strong>{{ project_access }}</p>
+						<p><strong>Free Logs Remaining: </strong>{{ project_free_logs }}</p>
+						<p><strong>Created: </strong>{{ project_date_created }}</p>
+						<p><strong>Secret Key: </strong>{{ secret_key }} {% if reset_key %}<span class="label label-danger">New Key Created!</span>{% endif %}</p>
+					</div>
 
 				<div id="funds" class="tab-pane fade">
 					<h3 class="text-center">Add funds</h3>
@@ -98,7 +100,7 @@
 					                	{% elif edit_default_tabletype == "quantitative_discrete" %}
 					                		<option value="quantitative_discrete">Quantitative Discrete</option>
 					                		<option value="quantitative_continuous">Quantitative Continuous</option>
-					                		<option value="quanlitative">Qualitative</option>
+					                		<option value="qualitative">Qualitative</option>
 					                	{% elif edit_default_tabletype == "quantitative_continuous" %}
 					                		<option value="quantitative_continuous">Quantitative Continuous</option>
 					                		<option value="qualitative">Qualitative</option>
@@ -112,6 +114,22 @@
 				                </div>
 				                <input type="hidden" name="formtype" value="edit_project" />
 				            </form>
+
+				        </br>
+				            <div class="panel panel-warning">
+				            	<div class="panel-heading">
+									<h3 class="panel-title">Project Control</h3>
+								</div>
+				            	<div class="panel-body">
+					            	<form method="post" action="/log/{{ specific_project }}/" role="form">
+					                	{% csrf_token %}
+					                	<div class="text-center">
+						                    <button type="submit" value="update" class="btn btn-danger">Reset Secret Key</button>
+						                </div>
+						                <input type="hidden" name="formtype" value="reset_key" />
+					            	</form>
+				            	</div>
+				            </div>
 				        </div>
 				    </div>
 				</div>

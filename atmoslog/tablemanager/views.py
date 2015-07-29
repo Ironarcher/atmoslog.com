@@ -75,6 +75,23 @@ def projectlog(request, projectname, tablename):
 			revisedtables.append(table[length:])
 			print(table)
 
+		logset = db_interface.findlogs(projectname, tablename, 100)
+		total_in_logset = len(logset)
+		print(total_in_logset)
+		loglists = []
+		for i in range(10):
+			newlist = []
+			for l in range(10):
+				if 10*i+l < total_in_logset:
+					print(10*i+l)
+					newlist.append(logset[(10*i)+l])
+			loglists.append(newlist)
+
+		print(loglists[0])
+		finalloglist = zip(loglists[0], loglists[1], loglists[2],
+			loglists[3], loglists[4], loglists[5], loglists[6],
+			loglists[7], loglists[8], loglists[9])
+
 		#Compile list of all projects by the user and exclude the current one
 		#TODO: Make a webpage that is a complete list of all the user's recently viewed projects,
 		#owned projects, and a project search bar
@@ -83,7 +100,8 @@ def projectlog(request, projectname, tablename):
 			'specific_project' : projectname, 
 			'tablelist' : revisedtables,
 			'specific_table' : tablename,
-			'logs' : db_interface.findlogs(projectname, tablename, 100),
+			'range' : range(10),
+			'logs' : finalloglist,
 			'logcount' : db_interface.getlogcount(projectname, tablename),
 			'username' : user,
 			'first' : first,
@@ -256,7 +274,7 @@ def project_settings(request, projectname):
 		user = request.user.get_username()
 		access = db_interface.getProjectAccess(projectname) 
 		if access is None:
-			raise Http404("Project does not exist.")
+			raise Http404("Project does not exist.n")
 		elif access == "private":
 			myproject = True
 			projectlist = db_interface.getUserProjects(user) 
@@ -290,6 +308,7 @@ def project_settings(request, projectname):
 	issues2 = []
 	newname = quanqual = discretecontinuous = ""
 	edit_name = projectname
+	key_reset = False
 	edit_description = projectfile['description']
 	edit_access_final = projectfile['access']
 	edit_default_tabletype = projectfile['default_tabletype']
@@ -339,6 +358,12 @@ def project_settings(request, projectname):
 				db_interface.updateProject(projectname, edit_name, edit_access_final,
 					edit_description, edit_default_tabletype)
 				return HttpResponseRedirect('/log/%s' % edit_name)
+		elif request.POST['formtype'] == "reset_key":
+			#Reset the project's secret key
+			key_reset = True
+			first = True
+			edit_first = True
+			db_interface.resetKey(projectname)
 	else:
 		quanqual = db_interface.getTabletypeDefault(projectname)
 		first = True
@@ -354,7 +379,7 @@ def project_settings(request, projectname):
 	#TODO: Make a webpage that is a complete list of all the user's recently viewed projects,
 	#owned projects, and a project search bar 
 	print("ALERT")
-	print(edit_access_final)
+	print(key_reset)
 	context = {
 		'specific_project' : projectname, 
 		'project_description' : projectfile['description'],
@@ -367,6 +392,7 @@ def project_settings(request, projectname):
 		'username' : user,
 		'first' : first,
 		'edit_first' : edit_first,
+		'reset_key' : key_reset,
 		'newname' : newname,
 		'quanqual' : quanqual,
 		'discretecontinuous' : discretecontinuous,

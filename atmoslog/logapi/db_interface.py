@@ -2,6 +2,7 @@ import random
 import time
 import re
 from pymongo import MongoClient
+import pymongo
 
 c = MongoClient('localhost', 27017)
 db = c['atmos_final']
@@ -105,13 +106,14 @@ def updateProject(oldname, name, access, description, default_tabletype):
 	projects.update({"name" : oldname}, {"$set" : {"name" : name, "access" : access,
 		"description" : description, "default_tabletype": default_tabletype}})
 
-	query = db.collection_names(include_system_collections=False)
-	for table in query:
-		spl = table.split("-")
-		if spl[0] == oldname and table not in tableBlacklist:
-			newtablename = name + "-" + spl[1]
-			print(table)
-			db[table].rename(newtablename)
+	if oldname != name:
+		query = db.collection_names(include_system_collections=False)
+		for table in query:
+			spl = table.split("-")
+			if spl[0] == oldname and table not in tableBlacklist:
+				newtablename = name + "-" + spl[1]
+				print(table)
+				db[table].rename(newtablename)
 
 def chargeProject(project, amt):
 	projects = db['projects']
@@ -127,7 +129,7 @@ def chargeProject(project, amt):
 			else:
 				amtToSub = amt
 				projects.update({"name" : project}, {"$inc":{"free_logs" : -amtToSub}})
-				return free
+				return free - amt
 		else:
 			projects.update({"name" : project}, {"$inc":{"unpaid_logs" : amt}})
 			return 0
@@ -160,14 +162,11 @@ def findlogs(project, table, amt):
 	coll = db[name]
 	if coll is not None:
 		content = []
-		counter = 0
-		for post in coll.find():
-			if counter < amt:
-				if post['type'] == 'log':
-					content.append(post['value'])
-					counter = counter + 1
-			else:
-				break
+		logs = coll.find().sort([("datecreated", pymongo.DESCENDING)]).limit(amt+1)
+		print(logs)
+		for post in logs:
+			if post['type'] == 'log':
+				content.append(post['value'])
 		return content
 	else:
 		return '404'
@@ -239,3 +238,11 @@ def getProjectStatus(project):
 	projects = db['projects']
 	projectfile = projects.find_one({"name" : project})
 	return projectfile['status']
+
+def resetKey(project):
+	projects = db['projects']
+	nkey = randKey(20)
+	while(projects.find_one({"secret_key" : key})) is not None:
+		nkey = randKey(20)
+
+	projects.update({"name" : project}, {"$set" : {"secret_key" : nkey}})
