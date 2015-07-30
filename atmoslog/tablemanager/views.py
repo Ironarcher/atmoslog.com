@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 import db_interface
 
 import re
+import math
 import time
 
 def index(request):
@@ -41,7 +42,7 @@ def projectlog(request, projectname, tablename):
 				myproject = False
 
 	else:
-		return HttpResponseRedirect('/login/tables-%s-%s/' % (projectname, tablename))
+		return HttpResponseRedirect('/login?next=/log/%s/%s/' % (projectname, tablename))
 
 	issues = []
 	newname = quanqual = discretecontinuous = ""
@@ -223,7 +224,10 @@ def register_view(request):
 
 def create(request):
 	if not request.user.is_authenticated():
-		return HttpResponseRedirect("/login/")
+		return HttpResponseRedirect("/login/?next=/create/")
+	else:
+		authenticated = True
+		user = request.user
 	issues = []
 	#Another variable: Access -> true = public && false = private
 	name = description = ""
@@ -263,6 +267,8 @@ def create(request):
 	else:
 		first = True
 	context = {
+		"authenticated" : authenticated,
+		"user" : user,
 		"issues" : issues,
 		"first" : first,
 		"name_init" : name,
@@ -296,8 +302,7 @@ def project_settings(request, projectname):
 				myproject = False
 
 	else:
-		#return HttpResponseRedirect('/login/tables-%s-%s/' % (projectname, tablename))
-		return HttpResponseRedirect('/login/')
+		return HttpResponseRedirect('/login?next=/log/%s' % projectname)
 
 	#Verify that project exists
 	tables = db_interface.gettables(projectname)
@@ -379,10 +384,6 @@ def project_settings(request, projectname):
 	for table in tables:
 		revisedtables.append(table[length:])
 
-	#TODO: Make a webpage that is a complete list of all the user's recently viewed projects,
-	#owned projects, and a project search bar 
-	print("ALERT")
-	print(key_reset)
 	context = {
 		'specific_project' : projectname, 
 		'project_description' : projectfile['description'],
@@ -390,7 +391,11 @@ def project_settings(request, projectname):
 		'project_access' : projectfile['access'],
 		'project_free_logs' : projectfile['free_logs'],
 		'project_date_created' : timeSince(projectfile['datecreated']),
+		'project_last_added_free_logs' : timeSince(projectfile['last_added_free_logs']),
 		'secret_key' : projectfile['secret_key'],
+		'project_total_logs' : projectfile['total_logs'],
+		'project_popularity' : projectfile['popularity'],
+		'project_status' : projectfile['status'],
 		'tablelist' : revisedtables,
 		'username' : user,
 		'first' : first,
@@ -426,10 +431,8 @@ def user_page(request):
 		about_me = None
 		favorite_language = None
 		join_date = None
-	else:
-		HttpResponseRedirect('/login/')
 
-	context = {
+		context = {
 		"authenticated" : authenticated,
 		"user" : user,
 		"firstname" : firstname,
@@ -439,8 +442,52 @@ def user_page(request):
 		"favorite_language" : favorite_language,
 		"join_date" : join_date,
 		"user_projects" : db_interface.getUserProjects(username),
+		}
+		return render(request, 'tablemanager/account.html', context)
+	else:
+		return HttpResponseRedirect('/login/?next=/account/')
+
+def search(request):
+	query = ""
+	if request.GET:
+		query = request.GET['query']
+		if len(request.GET) == 2 and 'searchtype' in request.GET:
+			searchtype = request.GET['searchtype']
+
+	if request.POST:
+		query = request.POST['query']
+		searchtype = request.POST['searchtype']
+
+	if request.user.is_authenticated():
+		authenticated = True
+		user = request.user
+		results = db_interface.overallProjectSearch_withuser(query, user.get_username(), 20)
+	else:
+		authenticated = False
+		user = None
+		results = db_interface.overallProjectSearch(query, 20)
+	print('warning query')
+
+	names = []
+	descriptions = []
+	popularities = []
+	total_logs = []
+	admins = []
+	for project in results:
+		names.append(project['name'])
+		descriptions.append(project['description'])
+		popularities.append(normalize(project['popularity']))
+		total_logs.append(normalize(project['total_logs']))
+		admins.append(project['admins'][0])
+	projects = zip(names, descriptions, popularities, total_logs, admins)
+	print(len(names))
+
+	context = {
+		"authenticated" : authenticated,
+		"user" : user,
+		"results" : projects,
 	}
-	return render(request, 'tablemanager/account.html', context)
+	return render(request, 'tablemanager/search.html', context)
 
 def check_user_exists(username):
 	if User.objects.filter(username=username).exists():
@@ -515,3 +562,12 @@ def logsToCents(logs):
 	cents = cents + (logs * 6 / 10000)
 	return cents
 
+def normalize(number):
+	if number > 1000000000:
+		return str(math.floor((number/1000000000)) + "b"
+	elif number > 1000000:
+		return str(math.floor((number/1000000)) + "m"
+	elif number > 1000:
+		return str(math.floor((number/1000)) + "k"
+	else:
+		return str(number)

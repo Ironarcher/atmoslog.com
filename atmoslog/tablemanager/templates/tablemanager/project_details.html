@@ -4,11 +4,20 @@
 .center-pills {
 	display: inline-block;
 }
+#head_two{
+	display: inline-block;
+	float: right;
+	margin-bottom: 0px;
+}
+#head_one {
+	display: inline-block;
+	margin-bottom: 0px;
+}
 {% endblock %}
 
 {% block inside %}
 <div class="panel panel-default">
-	<div class="panel-heading">Project details</div>
+	<div class="panel-heading"><p id="head_one" class="inline">Project details</p><p id="head_two" class="text-right">Status: {{ project_status }}</div>
 		<div class="panel-body">
 			<div class="col-md-12 text-center">
 				<ul class="nav nav-pills center-pills">
@@ -26,8 +35,11 @@
 						<p><strong>Funds Remaining: </strong>{{ project_funds }}</p>
 						<p><strong>Access: </strong>{{ project_access }}</p>
 						<p><strong>Free Logs Remaining: </strong>{{ project_free_logs }}</p>
+						<p><strong>Free logs added: </strong>{{ project_last_added_free_logs }}</p>
 						<p><strong>Created: </strong>{{ project_date_created }}</p>
 						<p><strong>Secret Key: </strong>{{ secret_key }} {% if reset_key %}<span class="label label-danger">New Key Created!</span>{% endif %}</p>
+						<p><strong>Total logs: </strong>{{ project_total_logs }}</p>
+						<p><strong>Popularity: </strong>{{ project_popularity }}</p>
 					</div>
 
 				<div id="funds" class="tab-pane fade">

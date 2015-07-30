@@ -242,7 +242,37 @@ def getProjectStatus(project):
 def resetKey(project):
 	projects = db['projects']
 	nkey = randKey(20)
-	while(projects.find_one({"secret_key" : key})) is not None:
+	while(projects.find_one({"secret_key" : nkey})) is not None:
 		nkey = randKey(20)
 
 	projects.update({"name" : project}, {"$set" : {"secret_key" : nkey}})
+
+def overallProjectSearch_withuser(query, username, amt):
+	projects = db['projects']
+	search = projects.find({"name" : {"$regex" : ".*" + query + ".*"}, "access" : "public"}).sort([("popularity", pymongo.DESCENDING)]).limit(amt)
+	personal_search = projects.find({"name" : {"$regex" : ".*" + query + ".*"}, "admins" : username})
+
+	#The search result changed to list form
+	search2 = []
+	#The final returned list (after compiling with private results)
+	finalsearch = []
+	for project in search:
+		search2.append(project)
+
+	search_names = []
+	for post in search2:
+		search_names.append(post['name'])
+
+	for post in personal_search:
+		if post['name'] not in search_names:
+			finalsearch.append(post)
+
+	for post in search2:
+		finalsearch.append(post)
+
+	return finalsearch
+
+def overallProjectSearch(query, amt):
+	projects = db['projects']
+	search = projects.find({"name" : {"$regex" : ".*" + query + ".*"}, "access" : "public"}).sort([("popularity", pymongo.DESCENDING)]).limit(amt)
+	return search

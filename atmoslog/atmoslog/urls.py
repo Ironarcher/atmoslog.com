@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^docs/', include('atmoslog_docs.urls')),
     url(r'^pricing/$', 'atmoslog_main.views.pricing'),
     url(r'^settings/$', 'tablemanager.views.settings'),
+    url(r'^search/$', 'tablemanager.views.search'),
     url(r'^api/', include('logapi.urls')),
 
     #User controls
