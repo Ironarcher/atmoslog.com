@@ -1,17 +1,24 @@
 {% extends "tables.html" %}
 
+{% block addstyle %}
+.center-pills {
+	display: inline-block;
+}
+{% endblock %}
+
 {% block inside %}
 <div class="panel panel-default">
 	<div class="panel-heading">Project details</div>
 		<div class="panel-body">
-			<div class="text-center">
-				<ul class="nav nav-pills">
+			<div class="col-md-12 text-center">
+				<ul class="nav nav-pills center-pills">
 				  <li role="presentation" class="active"><a href="#details" data-toggle="pill">Details</a></li>
 				  <li role="presentation"><a href="#funds" data-toggle="pill">Funds</a></li>
 				  <li role="presentation"><a href="#settings" data-toggle="pill">Settings</a></li>
 				</ul>
 			</div>
 		</br>
+	</br>
 				<div class="tab-content">
 					<div id="details" class="tab-pane fade in active">
 						<p><strong>Name: </strong>{{ specific_project }}</p>

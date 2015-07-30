@@ -85,6 +85,8 @@ def projectlog(request, projectname, tablename):
 				if 10*i+l < total_in_logset:
 					print(10*i+l)
 					newlist.append(logset[(10*i)+l])
+				else:
+					newlist.append("")
 			loglists.append(newlist)
 
 		print(loglists[0])
@@ -122,7 +124,12 @@ def projectlog(request, projectname, tablename):
 def login_view(request):
 	status = "started"
 	username = password = ""
-	if request.method == "POST":
+	next = ""
+	if request.GET:
+		next = request.GET['next']
+		print(next)
+
+	if request.POST:
 		first = False
 		username = request.POST['username']
 		password = request.POST['password']
@@ -131,17 +138,13 @@ def login_view(request):
 			if user.is_active:
 				login(request, user)
 				status = "success"
-				#TODO: Still not working (request.session.set_expiry)
-				#is not closing the session
-				remember = request.POST.getlist('remember')
-				if "remember" not in remember:
-					request.session.set_expiry(0)
-				#if next.startswith("tables-"):
-				#	parts = next.split("-")
-				#	return HttpResponseRedirect("/log/%s/%s/" % (parts[1], parts[2]))
-				#else:
-				#	return HttpResponseRedirect("/")
-				return HttpResponseRedirect("/")
+				remember = request.POST.getlist('remember[]')
+				if "remember" in remember:
+					request.session.set_expiry(1209600)
+				if next == "":
+					return HttpResponseRedirect("/")
+				else:
+					return HttpResponseRedirect(next)
 			else:
 				status = "inactive"
 		else:
@@ -153,7 +156,7 @@ def login_view(request):
 		"first" : first,
 		"username_init" : username,
 		"password_init" : password,
-		#"next" : next,
+		"next" : next,
 	}
 	return render(request, 'tablemanager/login.html', context)
 
@@ -230,7 +233,7 @@ def create(request):
 		description = request.POST['description']
 		creator = request.user.get_username()
 		#TODO: fix the access (can only be private for some reason)
-		access = request.POST.getlist('public')
+		access = request.POST.getlist('public[]')
 		if "public" in access:
 			access_final = "public"
 		else:

@@ -10,86 +10,124 @@
 {% endblock %}
 
 {% block docs %}
+</br>
+<div class="row">
+	<div class="col-md-4 col-md-offset-4">
+		<div class="panel panel-default">
+			<div class="panel-heading text-center">Table of Contents</div>
+			<div class="panel-body">
+				<ol>
+					<li><a href="#introduction">Introduction</a></li>
+					<li><a href="#log">Log single datum</a></li>
+					<li><a href="#bulklog">Multiple logs at once</a></li>
+					<li><a href="#createtable">Create a table</a></li>
+					<li><a href="#status">Get the project and server status</a></li>
+					<li><a href="#interpret">How to interpret results</a></li>
+					<li><a href="#ajax">Using AJAX</a></li>
+				</ol>
+			</div>
+		</div> <!-- panel -->
+	</div> <!-- columns -->
+</div> <!-- rows -->
 
-<div class="page-header">
-	<h3>Introduction</h3>
-</div>	
-<p>The easiest way to interact with the Atmoslog platform is to submit data through HTTP. Specific URL's are available through the Web API to create tables, request the status of tables and the Atmos servers, and log data. All other API's for other programming languages rely on the Web API to connect programming languages and the Atmoslog database. No other programming knowledge is required to use the Web API and no exterior installion is needed. However, all submissions into the Web API return JSON (Javascript Object Notation) objects to report errors and other useful information. Therefore, AJAX is natively supported with all of these methods. The following sections describe the specific functions available through the Web API.</p>
-<p><strong>Prerequisites:</strong> A project (find your secret api key) and a table (a default one called <code>log</code> is automatically created).</p>
-<div class="alert alert-warning" role="alert"><span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span><strong> Warning: </strong>The project's secret api key must be kept secret! It keeps hackers and others from logging unwanted data to your projecets! To change your secret api key, go to the project dashboard and click the <code>Reset Secret Key</code> button under Settings</div>
-
-<div class="page-header">
-	<h3>Log single datum</h3>
+<div id="introduction">
+	<div class="page-header">
+		<h3>Introduction</h3>
+	</div>	
+	<p>The easiest way to interact with the Atmoslog platform is to submit data through HTTP. Specific URL's are available through the Web API to create tables, request the status of tables and the Atmos servers, and log data. All other API's for other programming languages rely on the Web API to connect programming languages and the Atmoslog database. No other programming knowledge is required to use the Web API and no exterior installion is needed. However, all submissions into the Web API return JSON (Javascript Object Notation) objects to report errors and other useful information. Therefore, AJAX is natively supported with all of these methods. The following sections describe the specific functions available through the Web API.</p>
+	<p><strong>Prerequisites:</strong> A project (find your secret api key) and a table (a default one called <code>log</code> is automatically created).</p>
+	<div class="alert alert-warning" role="alert"><span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span><strong> Warning: </strong>The project's secret api key must be kept secret! It keeps hackers and others from logging unwanted data to your projecets! To change your secret api key, go to the project dashboard and click the <code>Reset Secret Key</code> button under Settings</div>
 </div>
-<p>Syntax:</p><pre>atmoslog.com/api/log/SAMPLE_API_KEY/SAMPLE_TABLE_NAME/DATA_TO_LOG/</pre>
-<p><strong>Description: </strong>To log a single piece of data into a specific project, replace <code>SAMPLE_API_KEY</code> with your project's secret (found in your dashboard at atmoslog.com/log/<code>YOUR_PROJECT_NAME</code>). Then, enter a table to log data to and data to log afterwards.</p>
-<p>Example:</p><pre>atmoslog.com/api/log/cT6WvFp4bfD1L42pyI03/log/user_logged_in</pre>
-<p>Result:</p><pre>{
-"project_name": "mywebsiteproject",
-"table_name": "log", 
-"log": "user_logged_in", 
-"free_logs_left": 99999, 
-"error": ""
-}
-</pre>
 
-<div class="page-header">
-	<h3>Log bulk data<small> Multiple logs at once</small></h3>
+<div id="log">
+	<div class="page-header">
+		<h3>Log single datum</h3>
+	</div>
+	<p>Syntax:</p><pre>atmoslog.com/api/log/SAMPLE_API_KEY/SAMPLE_TABLE_NAME/DATA_TO_LOG/</pre>
+	<p><strong>Description: </strong>To log a single piece of data into a specific project, replace <code>SAMPLE_API_KEY</code> with your project's secret (found in your dashboard at atmoslog.com/log/<code>YOUR_PROJECT_NAME</code>). Then, enter a table to log data to and data to log afterwards.</p>
+	<p>Example:</p><pre>atmoslog.com/api/log/cT6WvFp4bfD1L42pyI03/log/user_logged_in</pre>
+	<p>Result:</p><pre>{
+	"project_name": "mywebsiteproject",
+	"table_name": "log", 
+	"log": "user_logged_in", 
+	"free_logs_left": 99999, 
+	"error": ""
+	}
+	</pre>
 </div>
-<p>Syntax:</p><pre>atmoslog.com/api/bulklog/SAMPLE_API_KEY/SAMPLE_TABLE_NAME/BULK_DATA_TO_LOG/</pre>
-<p><strong>Description: </strong>This method works exactly the same way as logging a single data point, but you can write multiple logs to your project with one HTTP call. Seperate your logs with <code>&</code>. If your log contains an ampersand, you must convert it to <code>!%&gt;&lt;</code>, after which the server will autmatically assume that is the ampersand value.</p>
-<p>Example:</p><pre>atmoslog.com/api/log/cT6WvFp4bfD1L42pyI03/feedback/great_job&needs_work&needs_attention!%&gt;&lt;care</pre>
-<p>Result:</p><pre>{
-"project_name": "mywebsiteproject",
-"table_name": "log",
-"log": ["great_job", "needs_work", "needs_attention&care"],
-"free_logs_left": 99997,
-"error": ""
-}
-</pre>
 
-<div class="page-header">
-	<h3>Create a table</h3>
+<div id="bulklog">
+	<div class="page-header">
+		<h3>Log bulk data<small> Multiple logs at once</small></h3>
+	</div>
+	<p>Syntax:</p><pre>atmoslog.com/api/bulklog/SAMPLE_API_KEY/SAMPLE_TABLE_NAME/BULK_DATA_TO_LOG/</pre>
+	<p><strong>Description: </strong>This method works exactly the same way as logging a single data point, but you can write multiple logs to your project with one HTTP call. Seperate your logs with <code>&</code>. If your log contains an ampersand, you must convert it to <code>!%&gt;&lt;</code>, after which the server will autmatically assume that is the ampersand value.</p>
+	<p>Example:</p><pre>atmoslog.com/api/log/cT6WvFp4bfD1L42pyI03/feedback/great_job&needs_work&needs_attention!%&gt;&lt;care</pre>
+	<p>Result:</p><pre>{
+	"project_name": "mywebsiteproject",
+	"table_name": "log",
+	"log": ["great_job", "needs_work", "needs_attention&care"],
+	"free_logs_left": 99997,
+	"error": ""
+	}
+	</pre>
 </div>
-<p>Syntax:</p><pre>atmoslog.com/api/createtable/SAMPLE_API_KEY/NEW_TABLE_NAME/</pre>
-<p><strong>Description: </strong>To programically create a table in your project, use this method. Replace the <code>NEW_TABLE_NAME</code> with a valid table name (alphanumeric characters and underscores that is 4 to 50 characters long).
-<p>Example:</p><pre>atmoslog.com/api/createtable/cT6WvFp4bfD1L42pyI03/feedback/</pre>
-<p>Result:</p><pre>{
-"table_type": "qualitative", 
-"project_name": "mywebsiteproject",
-"table_name": "feedback",
-"result": "success",
-"error": ""
-}
-</pre>
 
-<div class="page-header">
-	<h3>Get the project and server status</h3>
+<div id="createtable">
+	<div class="page-header">
+		<h3>Create a table</h3>
+	</div>
+	<p>Syntax:</p><pre>atmoslog.com/api/createtable/SAMPLE_API_KEY/NEW_TABLE_NAME/</pre>
+	<p><strong>Description: </strong>To programically create a table in your project, use this method. Replace the <code>NEW_TABLE_NAME</code> with a valid table name (alphanumeric characters and underscores that is 4 to 50 characters long).
+	<p>Example:</p><pre>atmoslog.com/api/createtable/cT6WvFp4bfD1L42pyI03/feedback/</pre>
+	<p>Result:</p><pre>{
+	"table_type": "qualitative", 
+	"project_name": "mywebsiteproject",
+	"table_name": "feedback",
+	"result": "success",
+	"error": ""
+	}
+	</pre>
 </div>
-<p>Syntax:</p><pre>atmoslog.com/api/status/SAMPLE_API_KEY/</pre>
-<p><strong>Description: </strong> This method returns the status of the database server (to make sure that your log will be committed) and the status of the project (to see if it is stopped or out of funds).
-<p>Example:</p><pre>atmoslog.com/api/status/cT6WvFp4bfD1L42pyI03/</pre>
-<p>Result:</p><pre>{
-"server_status": "on",
-"project_status": "running",
-"error": ""
-}
-</pre>
 
-<div class="page-header">
-	<h3>How to interpret results</h3>
+<div id="status">
+	<div class="page-header">
+		<h3>Get the project and server status</h3>
+	</div>
+	<p>Syntax:</p><pre>atmoslog.com/api/status/SAMPLE_API_KEY/</pre>
+	<p><strong>Description: </strong> This method returns the status of the database server (to make sure that your log will be committed) and the status of the project (to see if it is stopped or out of funds).
+	<p>Example:</p><pre>atmoslog.com/api/status/cT6WvFp4bfD1L42pyI03/</pre>
+	<p>Result:</p><pre>{
+	"server_status": "on",
+	"project_status": "running",
+	"error": ""
+	}
+	</pre>
 </div>
-<p><strong>Usage: </strong>A JSON Object is returned when using these methods. The project name, table name, and logged data are returned. Every user is awarded 100,000 free data writes (logs) per project per month. The remaining free logs will also be returned.</p>
-<p><strong>Exceptions: </strong>If an exception occurs, the "error" key will not be blank and no other data will be returned.
-	<ul>
-		<li>If the API secret key is incorrect then <code>"error" : "incorrect api key"</code></li>
-		<li>If the table does not exist in the project then <code>"error" : "incorrect table name"</code></li>
-		<li>If the project has no more funds or free logs remaining then <code>"error" : "project_overdrawn"</code></li>
-		<li>If the project has been manually stopped by a user then <code>"error" : "project_stopped"</code></li>
-		<li>If the project has logged that data but failed to charge the user then <code>"error" : "logged but failed to charge"</code></li>
-		<li>If the server commits a miscellaneous error (like corruption) then <code>"error" : "processing error"</code></li>
-	</br>
-		<div class="alert alert-info" role="alert"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><strong> Note: </strong>If the server commits many consecutive processing errors, contact Atmoslog support.</div>
-		<li>A <code>404: Page not found</code> error will occur if the your API key contains non-alphanumeric characters or is not the required 20 characters long, or the table name contains non-alphanumeric characters or is not the required 4-50 characters long, or the logged data is longer than 100 characters.</li>
-	</ul>
+
+<div id="interpret">
+	<div class="page-header">
+		<h3>How to interpret results</h3>
+	</div>
+	<p><strong>Usage: </strong>A JSON Object is returned when using these methods. The project name, table name, and logged data are returned. Every user is awarded 100,000 free data writes (logs) per project per month. The remaining free logs will also be returned.</p>
+	<p><strong>Exceptions: </strong>If an exception occurs, the "error" key will not be blank and no other data will be returned.
+		<ul>
+			<li>If the API secret key is incorrect then <code>"error" : "incorrect api key"</code></li>
+			<li>If the table does not exist in the project then <code>"error" : "incorrect table name"</code></li>
+			<li>If the project has no more funds or free logs remaining then <code>"error" : "project_overdrawn"</code></li>
+			<li>If the project has been manually stopped by a user then <code>"error" : "project_stopped"</code></li>
+			<li>If the project has logged that data but failed to charge the user then <code>"error" : "logged but failed to charge"</code></li>
+			<li>If the server commits a miscellaneous error (like corruption) then <code>"error" : "processing error"</code></li>
+		</br>
+			<div class="alert alert-info" role="alert"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><strong> Note: </strong>If the server commits many consecutive processing errors, contact Atmoslog support.</div>
+			<li>A <code>404: Page not found</code> error will occur if the your API key contains non-alphanumeric characters or is not the required 20 characters long, or the table name contains non-alphanumeric characters or is not the required 4-50 characters long, or the logged data is longer than 100 characters.</li>
+		</ul>
+</div>
+
+<div id="ajax">
+	<div class="page-header">
+		<h3>Using AJAX</h3>
+	</div>
+	<p>Documentation in progress</p>
+</div>
 {% endblock %}

@@ -246,3 +246,14 @@ def resetKey(project):
 		nkey = randKey(20)
 
 	projects.update({"name" : project}, {"$set" : {"secret_key" : nkey}})
+
+def overallProjectSearch(query, username, amt):
+	projects = db['projects']
+	search = projects.find({"name" : query, "access" : "public"}).sort([("popularity", pymongo.DESCENDING)]).limit(amt)
+	personal_search = projects.find({"name" : query, "admins" : username})
+
+	for post in personal_search:
+		if post not in search:
+			search.append(post)
+
+	return search
