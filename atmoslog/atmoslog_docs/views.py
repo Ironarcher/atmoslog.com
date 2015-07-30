@@ -16,3 +16,17 @@ def docs_index(request):
 		"user" : user,
 	}
 	return render(request, 'atmoslog_docs/docs_home.html', context)
+
+def webapi(request):
+	if request.user.is_authenticated():
+		authenticated = True
+		user = request.user
+	else:
+		authenticated = False
+		user = None
+
+	context = {
+		"authenticated" : authenticated,
+		"user" : user,
+	}
+	return render(request, 'atmoslog_docs/webapi.html', context)

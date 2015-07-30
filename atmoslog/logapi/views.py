@@ -21,9 +21,9 @@ def weblog(apikey, tablename, log):
 		else:
 			status = db_interface.getProjectStatus(project_name)
 			if status == "overdrawn":
-				result['error'] = "project overdrawn (add funds)"
+				result['error'] = "project_overdrawn"
 			elif status == "stopped":
-				result['error'] = "project stopped by user"
+				result['error'] = "project_stopped"
 			elif status == 'running':
 				db_interface.log(project_name, tablename, log)
 

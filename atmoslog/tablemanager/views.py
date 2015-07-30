@@ -410,9 +410,34 @@ def project_settings(request, projectname):
 
 #Login is required to view this page
 def user_page(request):
-	username = request.user.get_username()
+	if request.user.is_authenticated():
+		authenticated = True
+		user = request.user
+		username = request.user.get_username()
+		#get the firstname and lastname
 
-	return None
+		userobj = User.objects.get(username=user)
+		firstname = userobj.first_name
+		lastname = userobj.last_name
+		email = userobj.email
+		about_me = None
+		favorite_language = None
+		join_date = None
+	else:
+		HttpResponseRedirect('/login/')
+
+	context = {
+		"authenticated" : authenticated,
+		"user" : user,
+		"firstname" : firstname,
+		"lastname" : lastname,
+		"email" : email,
+		"about_me" : about_me,
+		"favorite_language" : favorite_language,
+		"join_date" : join_date,
+		"user_projects" : db_interface.getUserProjects(username),
+	}
+	return render(request, 'tablemanager/account.html', context)
 
 def check_user_exists(username):
 	if User.objects.filter(username=username).exists():
