@@ -276,3 +276,9 @@ def overallProjectSearch(query, amt):
 	projects = db['projects']
 	search = projects.find({"name" : {"$regex" : ".*" + query + ".*"}, "access" : "public"}).sort([("popularity", pymongo.DESCENDING)]).limit(amt)
 	return search
+
+def changeStatus(projectname, status):
+	projects = db['projects']
+	project = projects.find_one({"name" : projectname})
+	if status == "running" or status == "stopped" or status == "overdrawn":
+		project['status'] = status

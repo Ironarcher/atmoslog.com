@@ -26,16 +26,19 @@
 
 		<div class='col-md-10'>
 			<div class="well">
-				<div class="input-group">
-			      <input type="text" class="form-control" aria-label="userproject_search" placeholder="Search projects or users">
-			      <div class="input-group-btn">
-			        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Search users <span class="caret"></span></button>
-			        <ul class="dropdown-menu" role="menu">
-			          <li><a href="#">Search projects</a></li>
-			        </ul>
-			        <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
-			      </div><!-- /btn-group -->
-			    </div><!-- /input-group -->	
+				<form method="post" action="/search/" role="form">
+					{% csrf_token %}
+					<div class="input-group">
+				      <input type="text" class="form-control" name="query" aria-label="userproject_search" placeholder="Search projects or users">
+				      <div class="input-group-btn">
+				        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Search users <span class="caret"></span></button>
+				        <ul class="dropdown-menu" role="menu">
+				          <li><a href="#">Search projects</a></li>
+				        </ul>
+				        <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+				      </div><!-- /btn-group -->
+				    </div><!-- /input-group -->	
+				</form>
 
 			    {% if not firstname or not lastname %}
 			    	<h1 class="text-center">{{ user}}</h1>

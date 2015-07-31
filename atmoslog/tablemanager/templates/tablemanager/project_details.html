@@ -147,6 +147,18 @@
 						                </div>
 						                <input type="hidden" name="formtype" value="reset_key" />
 					            	</form>
+					            </br>
+					            	{% if project_status == "overdrawn" %}
+					            	<p>Warning: Cannot turn the project on or off because it is overdrawn.</p>
+					            	{% else %}
+					            	<form method="post" action="/log/{{ specific_project }}/" role="form">
+					                	{% csrf_token %}
+					                	<div class="text-center">
+						                    <button type="submit" value="statusupdate" class="btn btn-danger">{% if project_status == "running" %}Stop Project{% elif project_status == "stopped"%}Start Project{% endif %}</button>
+						                </div>
+						                <input type="hidden" name="formtype" value="change_status" />
+					            	</form>
+					            	{% endif %}
 				            	</div>
 				            </div>
 				        </div>

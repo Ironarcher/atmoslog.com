@@ -372,6 +372,14 @@ def project_settings(request, projectname):
 			first = True
 			edit_first = True
 			db_interface.resetKey(projectname)
+		elif request.POST['formtype'] == "change_status":
+			first = True
+			edit_first = True
+			if projectfile['status'] == "running":
+				db_interface.changeStatus(projectname, "stopped")
+			elif projectfile['status'] == "stopped":
+				db_interface.changeStatus(projectname, "running")
+			return HttpResponseRedirect('/log/%s' % projectname)
 	else:
 		quanqual = db_interface.getTabletypeDefault(projectname)
 		first = True
@@ -449,14 +457,17 @@ def user_page(request):
 
 def search(request):
 	query = ""
+	searchtype = "projects"
 	if request.GET:
 		query = request.GET['query']
 		if len(request.GET) == 2 and 'searchtype' in request.GET:
 			searchtype = request.GET['searchtype']
 
 	if request.POST:
-		query = request.POST['query']
-		searchtype = request.POST['searchtype']
+		if 'query' in request.POST:
+			query = request.POST['query']
+		if 'searchtype' in request.POST:
+			searchtype = request.POST['searchtype']
 
 	if request.user.is_authenticated():
 		authenticated = True
@@ -564,10 +575,10 @@ def logsToCents(logs):
 
 def normalize(number):
 	if number > 1000000000:
-		return str(math.floor((number/1000000000)) + "b"
+		return str(math.floor(number/1000000000)) + "b"
 	elif number > 1000000:
-		return str(math.floor((number/1000000)) + "m"
+		return str(math.floor(number/1000000)) + "m"
 	elif number > 1000:
-		return str(math.floor((number/1000)) + "k"
+		return str(math.floor(number/1000)) + "k"
 	else:
 		return str(number)
