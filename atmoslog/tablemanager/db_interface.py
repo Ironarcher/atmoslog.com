@@ -3,6 +3,7 @@ import time
 import re
 from pymongo import MongoClient
 import pymongo
+from bson.son import SON
 
 c = MongoClient('localhost', 27017)
 db = c['atmos_final']
@@ -281,3 +282,37 @@ def changeStatus(projectname, status):
 	projects = db['projects']
 	if status == "running" or status == "stopped" or status == "overdrawn":
 		projects.update({"name" : projectname}, {"$set": {"status" : status}})
+
+def getFrequency_limit(projectname, tablename, limit):
+	size = getlogcount(projectname, tablename)
+	pipeline = [
+		{"$group" : {"_id" : "$value", "count" : {"$sum" : 1}}},
+		{"$sort" : SON([("count" , -1), ("_id", -1)])}
+	]
+	table = projectname + "-" + tablename
+	result1 =  list(db[table].aggregate(pipeline))
+	final_results = []
+	lm = 0
+	total_so_far = 0
+	for result in result1:
+		if lm < limit:
+			temp_dict = {}
+			temp_dict['log'] = result['_id']
+			temp_dict['count'] = result['count']
+			final_results.append(temp_dict)
+			total_so_far = total_so_far + result['count']
+		else:
+			#Compile everything else to the "others" category
+			final_results.append({"Other" : (size - total_so_far)})
+			break
+		lm = lm + 1
+
+	return final_results
+
+def getFrequency(projectname, tablename):
+	pipeline = [
+		{"$group" : {"_id" : "$value", "count" : {"$sum" : 1}}},
+		{"$sort" : SON([("count" , -1), ("_id", -1)])}
+	]
+	table = projectname + "-" + tablename
+	return list(db[table].aggregate(pipeline))

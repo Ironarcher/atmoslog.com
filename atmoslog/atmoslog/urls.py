@@ -28,9 +28,11 @@ urlpatterns = [
     url(r'^api/', include('logapi.urls')),
 
     #User controls
-    url(r'^login/$', 'tablemanager.views.login_view'),
-    url(r'^logout/$', 'tablemanager.views.logout_view'),
-    url(r'^account/$', 'tablemanager.views.user_page'),
-    url(r'^register/$', 'tablemanager.views.register_view'),
+    url(r'^login/$', 'usermanage.views.login_view'),
+    url(r'^logout/$', 'usermanage.views.logout_view'),
+    url(r'^account/$', 'usermanage.views.user_page'),
+    url(r'^register/$', 'usermanage.views.register_view'),
     url(r'^create/$', 'tablemanager.views.create'),
+    url(r'^changepassword/$', 'usermanage.views.changepassword_view'),
+    url(r'^reset/$', 'usermanage.view.reset_view'),
 ]

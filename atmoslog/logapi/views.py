@@ -148,9 +148,7 @@ def createtable_view(request, apikey, tablename):
 #After splitting by '&', convert '!%><' to '&'
 def bulklog_view(request, apikey, tablename, log):
 	loglist = []
-	process_log = log.split("&")
-	for post in process_log:
-		loglist.append(post.replace("!%><", "&"))
+	loglist = log.split("&")
 	return JsonResponse(weblogbulk(apikey, tablename, loglist))
 
 

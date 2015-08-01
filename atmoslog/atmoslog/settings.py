@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'atmoslog_main',
     'atmoslog_docs',
     'logapi',
+    'usermanage',
 )
 
 MIDDLEWARE_CLASSES = (
