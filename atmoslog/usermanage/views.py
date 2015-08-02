@@ -91,6 +91,8 @@ def register_view(request):
 				user.first_name = firstname
 			if len(lastname) != 0:
 				user.last_name = lastname
+			user.userprofile.about_me = ""
+			user.userprofile.fav_language = "?"
 			user.save()
 			#Redirect the user to the verification process
 			#TO-DO
@@ -121,9 +123,12 @@ def user_page(request):
 		firstname = userobj.first_name
 		lastname = userobj.last_name
 		email = userobj.email
-		about_me = None
-		favorite_language = None
-		join_date = None
+		about_me = ""
+		favorite_language = "Python"
+		join_date = "Forever"
+		#about_me = userobj.get_profile().about_me
+		#favorite_language = userobj.userprofile.fav_language
+		#join_date = userobj.userprofile.joined_on
 
 		context = {
 		"authenticated" : authenticated,
@@ -145,3 +150,9 @@ def changepassword_view(request):
 
 def reset_view(request):
 	pass
+
+def check_user_exists(username):
+	if User.objects.filter(username=username).exists():
+		return True
+	else:
+		return False
