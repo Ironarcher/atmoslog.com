@@ -1,0 +1,288 @@
+{% extends "tables.html" %}
+
+{% block include %}
+<script src="/static/Chart.js"></script>
+{% endblock %}
+
+{% block addstyle %}
+.center-pills {
+	display: inline-block;
+}
+#legend > ul {
+  list-style: none;
+}
+#legend ul li {
+  display: block;
+  padding-left: 30px;
+  position: relative;
+  margin-bottom: 4px;
+  border-radius: 5px;
+  padding: 2px 8px 2px 28px;
+  font-size: 14px;
+  cursor: default;
+  -webkit-transition: background-color 200ms ease-in-out;
+  -moz-transition: background-color 200ms ease-in-out;
+  -o-transition: background-color 200ms ease-in-out;
+  transition: background-color 200ms ease-in-out;
+}
+#legend li span {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 100%;
+  border-radius: 5px;
+}
+#chart-area > * {
+  float:left;
+}
+#legend {
+	margin-top: 50px;
+}
+#graph_header{
+	margin-top: 0px;
+	margin-bottom: -7px;
+}
+{% endblock %}
+
+{% block addscript %}
+
+$(document).ready(function(){
+	$('#tabledrop li a').click(function(event){
+		$('.dropdown-menu li.active').removeClass('active');
+	})
+});
+
+{% endblock %}
+
+{% block inside %}
+<div class="panel panel-default">
+	<div class="panel-heading">Viewing table:<strong> {{ specific_table }} </strong></div>
+	<div class="panel-body">
+		<div class="col-md-12 text-center">
+			<ul class="nav nav-pills center-pills">
+			  <li role="presentation"><a href=".logs" data-toggle="pill" data-target=".logs">Logs</a></li>
+			  <li role="presentation" class="active"><a href=".analysis" data-toggle="pill" data-target=".analysis">Analysis</a></li>
+			  <li role="presentation"><a href=".settings" data-toggle="pill" data-target=".settings">Settings</a></li>
+			</ul>
+		</div>
+
+		<div class="tab-content">
+			<div id="logs" class="tab-pane fade logs">
+				<!--
+				{% if logcount != 0 %}
+						<div class="dropdown">
+						  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+						    View last logs
+						    <span class="caret"></span>
+						  </button>
+						  <ul id="tabledrop" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+						    <li role="presentation"><a role="menuitem" href="#10" data-toggle="tab" data-target="#10">Last 10</a></li>
+						    {% if logcount > 10 %}
+						    	<li role="presentation"><a role="menuitem" href="#20" data-toggle="tab" data-target="#20">Last 20</a></li>
+						    {% endif %}
+						    {% if logcount > 20 %}
+						    	<li role="presentation"><a role="menuitem" href="#50" data-toggle="tab" data-target="#50">Last 50</a></li>
+						    {% endif %}
+						    {% if logcount > 50 %}
+						   		<li role="presentation"><a role="menuitem" href="#100" data-toggle="tab" data-target="#100">Last 100</a></li>
+						    {% endif %}
+						  </ul>
+						</div>
+						<div class="tab-content">
+							<div id="10" class="tab-pane active">
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<th>
+											</th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for log in logs %}
+											<tr>
+												<td>{{ log.0 }}</td>
+											</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+							<div id="20" class="tab-pane">
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<th>
+											</th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for log in logs %}
+											<tr>
+												<td>{{ log.0 }}</td>
+												<td>{{ log.1 }}</td>
+											</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+							<div id="50" class="tab-pane">
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<th>
+											</th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for log in logs %}
+											<tr>
+												<td>{{ log.0 }}</td>
+												<td>{{ log.1 }}</td>
+												<td>{{ log.2 }}</td>
+												<td>{{ log.3 }}</td>
+												<td>{{ log.4 }}</td>
+											</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+							<div id="100" class="tab-pane">
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<th>
+											</th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for log in logs %}
+											<tr>
+												<td>{{ log.0 }}</td>
+												<td>{{ log.1 }}</td>
+												<td>{{ log.2 }}</td>
+												<td>{{ log.3 }}</td>
+												<td>{{ log.4 }}</td>
+												<td>{{ log.5 }}</td>
+												<td>{{ log.6 }}</td>
+												<td>{{ log.7 }}</td>
+												<td>{{ log.8 }}</td>
+												<td>{{ log.9 }}</td>
+											</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+						</div>
+					</div>
+					{% else %}
+					<p>Create your first log. Visit "<a href="/docs/getstarted/">Get Started</a>" to begin.
+					</br>
+					</br>
+					{% endif %}
+					<h4>Statistics</h4>
+					<p>Amount of logs: {{ logcount }}</p>
+				-->
+
+			</div> <!-- tab pane -->
+			
+			<!-- Analysis page -->
+			<div id="analysis" class="tab-pane fade in active analysis">
+				<div class="row">
+					<div class="col-md-5">
+						<table class="table">
+							<thead>
+								<tr>
+									<th class="col-md-7">Log Type</th>
+									<th class="col-md-5">Number</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% if logcount != 0 %}
+									{% for log in freq_log %}
+										<tr>
+											<td>{{ log.0 }}</td>
+											<td>{{ log.1 }}</td>
+										</tr>
+									{% endfor %}
+								{% else %}
+										<tr>
+											<td>No logs yet</td>
+										</tr>
+								{% endif %}
+							</tbody>
+						</table>
+					</div>
+					<div class="col-md-7">
+						<h3 class="text-center" id="graph_header">Frequency graph</h3>
+						<hr>
+						{% if logcount != 0 %}
+						<div class="row">
+							<div class="col-md-7">
+								<div id="canvas-holder">
+									<canvas id="frequency-chart" width="500" height="400"></canvas>
+								</div>
+								<script>
+								var doughnutData = [
+								{
+									value: {{ ch1_data.1 }},
+									color:"#04173F",
+									label: "{{ ch1_data.0}}"
+								},
+								{% if type_amt > 1 %}
+								{
+									value: {{ ch1_data.3 }},
+									color: "#122D67",
+									label: "{{ ch1_data.2}}"
+								},
+								{% endif %}
+								{% if type_amt > 2 %}
+								{
+									value: {{ ch1_data.5 }},
+									color: "#254589",
+									label: "{{ ch1_data.4}}"
+								},
+								{% endif %}
+								{% if type_amt > 3 %}
+								{
+									value: {{ ch1_data.7 }},
+									color: "#47629C",
+									label: "{{ ch1_data.6}}"
+								},
+								{% endif %}
+								{% if type_amt > 4 %}
+								{
+									value: {{ ch1_data.9 }},
+									color: "#8297C4",
+									label: "{{ ch1_data.8}}"
+								}
+								{% endif %}
+							];
+							window.onload = function(){
+								var ctx = document.getElementById("frequency-chart").getContext("2d");
+								window.myDoughnut = new Chart(ctx).Doughnut(doughnutData, {
+									responsive : true,
+							    	tooltipTemplate: {{tooltipTemplate|safe}},
+							    	animationSteps: 70,
+							    	animationEasing: "easeOutQuint",
+								});
+								document.getElementById('legend').innerHTML = window.myDoughnut.generateLegend();
+							};
+							</script>
+							</div>
+							<div class="col-md-5">
+								<div id="legend"></div>
+							</div>
+							{% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Settinsg page -->
+			<div id="settings" class="tab-pane fade settings">
+
+			</div>
+		</div> <!-- tab content -->
+	</div> <!-- panel body -->
+</div> <!-- whole panel -->
+{% endblock %}

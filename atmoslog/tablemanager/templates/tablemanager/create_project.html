@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}AtmosLog: Create a Project{% endblock %}
+
+{% block style %}
+@media (min-width: 400px) {
+.container{
+    max-width: 400px;
+    min-width: 200px;
+    vertical-align: middle;
+    float: none;
+}
+
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class-"center-block">
+        {% if "name_length" in issues%}
+            <div class="alert alert-warning">
+                <p class="text-center">The project name must be between 4 and 50 characters.</p>
+            </div>
+        {% endif %}
+        {% if "name_char" in issues%}
+            <div class="alert alert-warning">
+               <p class="text-center">The project name can only contain alphanumeric characters and underscores.</p>
+            </div>
+        {% endif %}
+        {% if "description_length" in issues%}
+            <div class="alert alert-warning">
+               <p class="text-center">The project description must be less than 500 characters.</p>
+            </div>
+        {% endif %}
+        {% if "name_taken" in issues%}
+            <div class="alert alert-warning">
+               <p class="text-center">A project with this name already exists.</p>
+            </div>
+        {% endif %}
+
+        <h3 class="text-center">New Project</h3>
+        <div class="well">
+            <form method="post" action="/create/" role="form">
+                {% csrf_token %}
+
+                {% if "name_length" in issues or "name_char" in issues or "name_taken" in issues %}
+                    <div class="form-group has-error has-feedback">
+                {% elif not first %}
+                    <div class="form-group has-success has-feedback">
+                {% else %}
+                    <div class="form-group">
+                {% endif %}
+                    <label for="name">Project Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value={{ name_init }}>
+                {% if "name_length" in issues or "name_char" in issues or "name_taken" in issues %}
+                    <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                {% elif not first %}
+                    <span class="glyphicon glyphicon-ok form-control-feedback"></span>
+                {% endif %}
+                </div>
+
+                {% if "description_length" in issues %}
+                    <div class="form-group has-error has-feedback">
+                {% elif not first %}
+                    <div class="form-group has-success has-feedback">
+                {% else %}
+                    <div class="form-group">
+                {% endif %}
+                    <label for="description">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4" placeholder="Optional">{{description_init}}</textarea>
+                {% if "description_length" in issues %}
+                    <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+                {% elif not first %}
+                    <span class="glyphicon glyphicon-ok form-control-feedback"></span>
+                {% endif %}
+                </div>
+
+                <div class="checkbox">
+                    <label><input id="public" name="public[]" value="public" type="checkbox">Public?</label>
+                </div>
+
+                <button type="submit" value="login" class="btn btn-default">Submit</button>
+                <input type="hidden" name="next" value="{{ next }}" />
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{# Leave the right part of the navbar blank #}
+{% block navbarright %}
+<li><a href="/">Home</a></li>
+<li><a href="/getstarted">Get Started</a></li>
+<li><a href="/pricing">Pricing</a></li> 
+<li><a href="/docs">Documentation</a></li> 
+{% endblock %}

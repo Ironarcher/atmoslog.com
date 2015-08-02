@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block style %}
+
+#sidebar{
+	margin-top: 80px;
+}
+
+#descript{
+	display: block;
+	margin-top: 7px;
+}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+	<div class="row">
+		<div class='col-md-3'>
+			<!-- Column for sidebar -->
+			<div class="list-group" id="sidebar">
+				{% block sidebar %}
+					<a href="/docs/" class="list-group-item active">Home</a>
+					<a href="/docs/getstarted" class="list-group-item">Get Started</a>
+					<a href="/docs/webapi" class="list-group-item">Web API</a>
+				{% endblock %}
+			</div>
+		</div>
+
+		<div class="col-md-9">
+			<!-- Column for documentation content -->
+			<h3 class="text-right">{% block docs_title %}Documentation{% endblock %}
+				<small id="descript">{% block docs_description %}Details and tutorials of the Atmoslog API{% endblock %}</small></h3>
+			<div class="panel panel-default">
+				<div class="panel-body">
+					{% block docs %}
+
+					{% endblock %}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block navbarspec %}
+  <ul class="nav navbar-nav">
+    <li><a href="/">Home</a></li>
+    <li><a href="/docs/getstarted">Get Started</a></li>
+    <li><a href="/pricing">Pricing</a></li> 
+    <li class="active"><a href="/docs">Documentation</a></li> 
+  </ul>
+  <ul class="nav navbar-nav navbar-right">
+  	{% if authenticated %}
+  	<li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ user }} <span class="caret"></span></a>
+      <ul class="dropdown-menu" role="menu">
+        <li><a href="/create">Create a new project</a></li>
+        <li><a href="/account/">View your profile</a></li>
+        <li class="divider"></li>
+        <li><a href="/logout">Logout</a></li>
+      </ul>
+    </li>
+    {% else %}
+    <li><a href="/register"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
+    <li><a href="/login/?next={%block login_redirect %}/docs/{% endblock %}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+    {% endif %}
+  </ul>
+{% endblock navbarspec %}

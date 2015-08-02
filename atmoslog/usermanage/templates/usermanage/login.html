@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}AtmosLog: Login{% endblock %}
+
+{% block style %}
+@media (min-width: 400px) {
+.container{
+    max-width: 400px;
+    min-width: 200px;
+    vertical-align: middle;
+    float: none;
+}
+
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="center-block">
+        {% if status == "started" %}
+            {# Just the normal form #}
+        {% elif status == "success" %}
+            {# Should have already redirected #}
+        {% elif status == "inactive" %}
+            <div class="alert alert-danger">
+                <p class="text-center"><strong>Alert!</strong>Account has expired. Visit atmoslog support.</p>
+            </div>
+        {% elif status == "failed" %}
+            <div class="alert alert-warning">
+                <p class="text-center">Incorrect username and/or password. Try again.</p>
+            </div>
+        {% endif %}
+
+        <h3 class="text-center">Login</h3>
+        <div class="well">
+            {% if next %}
+            <form method="post" action="/login/?next={{next}}" role="form">
+            {% else %}
+            <form method="post" action="/login/" role="form">
+            {% endif %}
+                {% csrf_token %}
+                {% if status == "inactive" or status == "failed" %}
+                    <div class="form-group has-error has-feedback">
+                {% elif not first %}
+                    <div class="form-group has-success has-feedback">
+                {% else %}
+                    <div class="form-group">
+                {% endif %}
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" value= {{ username_init }}>
+                </div>
+
+                {% if status == "inactive" or status == "failed" %}
+                    <div class="form-group has-error has-feedback">
+                {% elif not first %}
+                    <div class="form-group has-success has-feedback">
+                {% else %}
+                    <div class="form-group">
+                {% endif %}
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" value= {{ password_init }}>
+                </div>
+
+                <div class="checkbox">
+                    <label><input id="remember" name="remember[]" value="true" type="checkbox">Remember me</label>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" value="login" class="btn btn-default">Submit</button>
+                </div>
+                <input type="hidden" name="next" value="{{ next }}" />
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{# Leave the right part of the navbar blank #}
+{% block navbarspec %}
+<ul class="nav navbar-nav">
+    <li><a href="/">Home</a></li>
+    <li><a href="/getstarted">Get Started</a></li>
+    <li><a href="/pricing">Pricing</a></li> 
+    <li><a href="/docs">Documentation</a></li> 
+</ul>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block style %}
+.settings{
+	display: block;
+	margin-top: 7px;
+	margin-bottom: 0px;
+}
+.projectlisting{
+	display: block;
+}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+	<div class="row">
+		<div class='col-md-2'>
+			<div class="text-center">
+				<img src = "/static/tablemanager/profile_default.png" alt="Profile image" class="img-rounded">
+				<a class="settings" href="#">Edit profile picture</a>
+				<a class="settings" href="#">Change password</a>
+				<a class="settings" href="#">Change email</a>
+				<a class="settings" href="#">Settings</a>
+			</div>
+		</div>
+
+		<div class='col-md-10'>
+			<div class="well">
+				<form method="post" action="/search/" role="form">
+					{% csrf_token %}
+					<div class="input-group">
+				      <input type="text" class="form-control" name="query" aria-label="userproject_search" placeholder="Search projects or users">
+				      <div class="input-group-btn">
+				        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Search users <span class="caret"></span></button>
+				        <ul class="dropdown-menu" role="menu">
+				          <li><a href="#">Search projects</a></li>
+				        </ul>
+				        <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+				      </div><!-- /btn-group -->
+				    </div><!-- /input-group -->	
+				</form>
+
+			    {% if not firstname or not lastname %}
+			    	<h1 class="text-center">{{ user}}</h1>
+			    {% else %}
+			    	<h1 class="text-center">{{ firstname }} "{{ user }}" {{ lastname }}</h1>
+			    {% endif %}
+
+			    <p><strong>Email: </strong>{{ email }}</p>
+			   	<p><strong>About me: </strong>{{ about_me }}</p>
+			   	<p><strong>Favorite programming language: </strong>{{ favorite_language }}</p>
+			   	<p><strong>Joined on: </strong>{{ join_date }}</p>
+
+			   	</br>
+			   	<div class="text-center">
+				   	<h4>My Projects:</h4>
+				   	<form class="form-inline">
+					  <div class="form-group">
+					    <label for="myprojects_search" class="sr-only">Search my projects</label>
+					    <input type="text" class="form-control" id="myprojects_search" placeholder="Search my projects">
+					  </div>
+					  <button type="submit" class="btn btn-default">Search</button>
+					</form>
+				</br>
+					{% for project in user_projects %}
+						<a class="projectlisting" href="/log/{{ project }}">{{ project }}</a>
+					{% endfor %}
+				</div>
+			</div> <!-- well -->
+		</div> <!-- column -->
+	</div> <!-- container -->
+</div>
+{% endblock %}
