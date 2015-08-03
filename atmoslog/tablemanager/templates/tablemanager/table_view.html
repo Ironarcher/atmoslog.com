@@ -221,61 +221,93 @@ $(document).ready(function(){
 								<div id="canvas-holder">
 									<canvas id="frequency-chart" width="500" height="400"></canvas>
 								</div>
-								<script>
-								var doughnutData = [
-								{
-									value: {{ ch1_data.1 }},
-									color:"#04173F",
-									label: "{{ ch1_data.0}}"
-								},
-								{% if type_amt > 1 %}
-								{
-									value: {{ ch1_data.3 }},
-									color: "#122D67",
-									label: "{{ ch1_data.2}}"
-								},
-								{% endif %}
-								{% if type_amt > 2 %}
-								{
-									value: {{ ch1_data.5 }},
-									color: "#254589",
-									label: "{{ ch1_data.4}}"
-								},
-								{% endif %}
-								{% if type_amt > 3 %}
-								{
-									value: {{ ch1_data.7 }},
-									color: "#47629C",
-									label: "{{ ch1_data.6}}"
-								},
-								{% endif %}
-								{% if type_amt > 4 %}
-								{
-									value: {{ ch1_data.9 }},
-									color: "#8297C4",
-									label: "{{ ch1_data.8}}"
-								}
-								{% endif %}
-							];
-							window.onload = function(){
-								var ctx = document.getElementById("frequency-chart").getContext("2d");
-								window.myDoughnut = new Chart(ctx).Doughnut(doughnutData, {
-									responsive : true,
-							    	tooltipTemplate: {{tooltipTemplate|safe}},
-							    	animationSteps: 70,
-							    	animationEasing: "easeOutQuint",
-								});
-								document.getElementById('legend').innerHTML = window.myDoughnut.generateLegend();
-							};
-							</script>
 							</div>
 							<div class="col-md-5">
 								<div id="legend"></div>
 							</div>
 							{% endif %}
 						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<div id="canvas-holder2 text-center" style="width:100%">
+									<canvas id="timeGraph" width="200" height="100"></canvas>
+								</div>
+									
+							</div>
+						</div>
 					</div>
 				</div>
+				<script>
+					//Scripts for graphs
+					var doughnutData = [
+					{
+						value: {{ ch1_data.1 }},
+						color:"#04173F",
+						label: "{{ ch1_data.0}}"
+					},
+					{% if type_amt > 1 %}
+					{
+						value: {{ ch1_data.3 }},
+						color: "#122D67",
+						label: "{{ ch1_data.2}}"
+					},
+					{% endif %}
+					{% if type_amt > 2 %}
+					{
+						value: {{ ch1_data.5 }},
+						color: "#254589",
+						label: "{{ ch1_data.4}}"
+					},
+					{% endif %}
+					{% if type_amt > 3 %}
+					{
+						value: {{ ch1_data.7 }},
+						color: "#47629C",
+						label: "{{ ch1_data.6}}"
+					},
+					{% endif %}
+					{% if type_amt > 4 %}
+					{
+						value: {{ ch1_data.9 }},
+						color: "#8297C4",
+						label: "{{ ch1_data.8}}"
+					}
+					{% endif %}
+				];
+				var lineChartData = {
+					labels: [{% for entry in ch2_data %}"{{ entry.datetime }}", {% endfor %}],
+					datasets : [
+						{
+							label: "dataset1",
+							fillColor : "rgba(151,187,205,0.2)",
+							strokeColor : "rgba(151,187,205,1)",
+							pointColor : "rgba(151,187,205,1)",
+							pointStrokeColor : "#fff",
+							pointHighlightFill : "#fff",
+							pointHighlightStroke : "rgba(151,187,205,1)",
+							data : [{% for entry in ch2_data %}{{ entry.count }}, {% endfor %}],
+						}]
+				}
+				window.onload = function(){
+					//Doughnut graph
+					var ctx = document.getElementById("frequency-chart").getContext("2d");
+					window.myDoughnut = new Chart(ctx).Doughnut(doughnutData, {
+						responsive : true,
+				    	tooltipTemplate: {{tooltipTemplate|safe}},
+				    	animationSteps: 70,
+				    	animationEasing: "easeOutQuint",
+					});
+					document.getElementById('legend').innerHTML = window.myDoughnut.generateLegend();
+					//Line graph
+					var ctx2 = document.getElementById("timeGraph").getContext("2d");
+					window.myLine = new Chart(ctx2).Line(lineChartData, {
+						responsive: true,
+						showTooltips: false,
+						pointDot: false,
+					});
+				};
+
+				</script>
 			</div>
 
 			<!-- Settinsg page -->

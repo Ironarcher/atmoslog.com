@@ -27,8 +27,6 @@ def projectlog(request, projectname, tablename):
 		elif access == "private":
 			myproject = True
 			projectlist = db_interface.getUserProjects(user) 
-			print projectlist
-			print user
 			if projectname in projectlist:
 				projectlist.remove(projectname)
 			else:
@@ -74,23 +72,19 @@ def projectlog(request, projectname, tablename):
 		length = len(projectname) + 1
 		for table in tables:
 			revisedtables.append(table[length:])
-			print(table)
 
 		logset = db_interface.findlogs(projectname, tablename, 100)
 		total_in_logset = len(logset)
-		print(total_in_logset)
 		loglists = []
 		for i in range(10):
 			newlist = []
 			for l in range(10):
 				if 10*i+l < total_in_logset:
-					print(10*i+l)
 					newlist.append(logset[(10*i)+l])
 				else:
 					newlist.append("")
 			loglists.append(newlist)
 
-		print(loglists[0])
 		finalloglist = zip(loglists[0], loglists[1], loglists[2],
 			loglists[3], loglists[4], loglists[5], loglists[6],
 			loglists[7], loglists[8], loglists[9])
@@ -117,7 +111,6 @@ def projectlog(request, projectname, tablename):
 				if 'Other' in row:
 					ch1_data.append("Other")
 					percentage = (float(row['Other'])/tot_logs)*100
-					print(percentage)
 					ch1_data.append(round(percentage))
 				else:
 					if row['log'] is not None:
@@ -126,7 +119,6 @@ def projectlog(request, projectname, tablename):
 						else:
 							ch1_data.append(row['log'])
 					percentage = (float(row['count'])/tot_logs)*100
-					print(percentage)
 					ch1_data.append(round(percentage))
 
 		context = {
@@ -146,7 +138,9 @@ def projectlog(request, projectname, tablename):
 			'freq_log' : freq_log,
 			'ch1_data' : ch1_data,
 			'type_amt' : type_amt,
-			'tooltipTemplate' : '"<%=label%>: <%= value %>%"'
+			'tooltipTemplate' : '"<%=label%>: <%= value %>%"',
+			'endtime' : int(time.time()),
+			'ch2_data' : db_interface.getTimeGraph_alltime(projectname, tablename),
 		}
 
 		if name in tables:
@@ -175,7 +169,6 @@ def create(request):
 			access_final = "public"
 		else:
 			access_final = "private"
-		print(access)
 		if len(name) < 4 or len(name) > 50:
 			#Project name must be 4-50 characters long.
 			issues.append("name_length")
@@ -220,8 +213,6 @@ def project_settings(request, projectname):
 		elif access == "private":
 			myproject = True
 			projectlist = db_interface.getUserProjects(user) 
-			print projectlist
-			print user
 			if projectname in projectlist:
 				projectlist.remove(projectname)
 			else:
@@ -275,7 +266,6 @@ def project_settings(request, projectname):
 			edit_description = request.POST['edit_description']
 			edit_access = request.POST.getlist('acc2[]')
 			edit_default_tabletype = request.POST['edit_quanqual']
-			print(edit_default_tabletype)
 
 			if len(edit_name) < 4 or len(edit_name) > 50:
 				#Project name must be 4-50 characters long.
@@ -379,7 +369,6 @@ def search(request):
 		authenticated = False
 		user = None
 		results = db_interface.overallProjectSearch(query, 20)
-	print('warning query')
 
 	names = []
 	descriptions = []
@@ -393,7 +382,6 @@ def search(request):
 		total_logs.append(normalize(project['total_logs']))
 		admins.append(project['admins'][0])
 	projects = zip(names, descriptions, popularities, total_logs, admins)
-	print(len(names))
 
 	context = {
 		"authenticated" : authenticated,
