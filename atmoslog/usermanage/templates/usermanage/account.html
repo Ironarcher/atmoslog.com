@@ -11,6 +11,28 @@
 }
 {% endblock %}
 
+{% block script %}
+$(document).ready(function(){
+	//Script to run the search projects function
+	var projects_loaded = new Array();
+	{% for project in user_projects %}
+		projects_loaded.splice(projects_loaded.length - 1, 0, '{{ project }}');
+	{% endfor %}
+	$('#myprojects_search').bind('keydown keyup keypress', function(event){
+		var search = $("#myprojects_search").val();
+		projects_loaded.forEach(function(entry){
+			var re = new RegExp(search, "gi");
+			if (entry.match(re)){
+				$("#my_" + entry).show();
+			} else{
+				$("#my_" + entry).hide();
+			}
+		});
+	});
+
+});
+{% endblock %}
+
 {% block content %}
 <div class="container">
 	<div class="row">
@@ -59,11 +81,10 @@
 					    <label for="myprojects_search" class="sr-only">Search my projects</label>
 					    <input type="text" class="form-control" id="myprojects_search" placeholder="Search my projects">
 					  </div>
-					  <button type="submit" class="btn btn-default">Search</button>
 					</form>
 				</br>
 					{% for project in user_projects %}
-						<a class="projectlisting" href="/log/{{ project }}">{{ project }}</a>
+						<a class="projectlisting" href="/log/{{ project }}" id="my_{{ project }}">{{ project }}</a>
 					{% endfor %}
 				</div>
 			</div> <!-- well -->
