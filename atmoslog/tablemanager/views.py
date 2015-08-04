@@ -121,6 +121,8 @@ def projectlog(request, projectname, tablename):
 					percentage = (float(row['count'])/tot_logs)*100
 					ch1_data.append(round(percentage))
 
+		ch2_data = db_interface.getTimeGraph_alltime(projectname, tablename)
+
 		context = {
 			'specific_project' : projectname, 
 			'tablelist' : revisedtables,
@@ -140,7 +142,8 @@ def projectlog(request, projectname, tablename):
 			'type_amt' : type_amt,
 			'tooltipTemplate' : '"<%=label%>: <%= value %>%"',
 			'endtime' : int(time.time()),
-			'ch2_data' : db_interface.getTimeGraph_alltime(projectname, tablename),
+			'ch2_data' : ch2_data[0],
+			'time_scale' : ch2_data[1],
 		}
 
 		if name in tables:

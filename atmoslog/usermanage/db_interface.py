@@ -4,6 +4,7 @@ import re
 from pymongo import MongoClient
 import pymongo
 from bson.son import SON
+from bisect import bisect_left
 
 c = MongoClient('localhost', 27017)
 db = c['atmos_final']
@@ -38,7 +39,8 @@ def createTable(ownerproject, tablename, tabletype):
 						   "duplicate_loss" : 0,
 						   "invalid_api_key" : 0,
 						   "server_error" : 0,
-						   "misc_error" : 0
+						   "misc_error" : 0,
+						   "datecreated" : int(time.time()),
 						  }
 			col = db[name]
 			col.insert_one(description)
@@ -113,7 +115,6 @@ def updateProject(oldname, name, access, description, default_tabletype):
 			spl = table.split("-")
 			if spl[0] == oldname and table not in tableBlacklist:
 				newtablename = name + "-" + spl[1]
-				print(table)
 				db[table].rename(newtablename)
 
 def chargeProject(project, amt):
@@ -164,7 +165,6 @@ def findlogs(project, table, amt):
 	if coll is not None:
 		content = []
 		logs = coll.find().sort([("datecreated", pymongo.DESCENDING)]).limit(amt+1)
-		print(logs)
 		for post in logs:
 			if post['type'] == 'log':
 				content.append(post['value'])
@@ -291,6 +291,9 @@ def getFrequency_limit(projectname, tablename, limit):
 	]
 	table = projectname + "-" + tablename
 	result1 =  list(db[table].aggregate(pipeline))
+	for entry in result1:
+		if entry['_id'] is None:
+			result1.remove(entry)
 	final_results = []
 	lm = 0
 	total_so_far = 0
@@ -315,4 +318,112 @@ def getFrequency(projectname, tablename):
 		{"$sort" : SON([("count" , -1), ("_id", -1)])}
 	]
 	table = projectname + "-" + tablename
+	first_list =  list(db[table].aggregate(pipeline))
+	for entry in first_list:
+		if entry['_id'] is None:
+			first_list.remove(entry)
+
+def getTimeGraph(projectname, tablename, seconds):
+	endtime = int(time.time()) - seconds
+	pipeline = [
+		{"$match" : { "datetime" : { "$gt" : endtime }}},
+		{"$group" : {"_id" : "$value", "count" : {"$sum" : 1}}},
+		{"$sort" : SON([("count" , -1), ("_id", -1)])},
+	]
+	table = projectname + "-" + tablename
 	return list(db[table].aggregate(pipeline))
+
+def getTimeGraph_alltime(projectname, tablename):
+	pipeline = [
+		{"$group" : {"_id" : "$datetime", "count" : {"$sum" : 1}}},
+		{"$sort" : { "datetime" : 1 }},
+	]
+	table = projectname + "-" + tablename
+	first_list = list(db[table].aggregate(pipeline))
+	#Remove description:
+	for entry1 in first_list:
+		if entry1['_id'] is None:
+			first_list.remove(entry1)
+
+	#Float to activate acurate division
+	first_time = db[table].find_one({"type" : "description"})['datecreated']
+	total_time = int(time.time()) - first_time
+	if total_time < 200:
+		intervals = float(total_time)
+	else:
+		intervals = 200.0
+	interval_list = []
+	#For finding the best fits for existing log datetimes
+	temp_list = []
+	set_int = total_time/intervals
+	for i in range(int(intervals)):
+		interval_list.append({"datetime" : (first_time + set_int*i), "count" : 0})
+		temp_list.append(first_time + set_int*i)
+	#Add the existing logs to the best fits in the empty sets
+	for entry in first_list:
+		closest = takeClosest(temp_list, entry['_id'])
+		#Code requires optimization
+		for p in interval_list:
+			if p['datetime'] == closest:
+				p['count'] = p['count'] + entry['count']
+				break
+
+	#Reduce the amount of datetimes in the x-axis labels
+	counter = 0
+	limit = 15
+	#Get the type of the x axis by checking the earliest time's type 
+	axis_listing = convertTime(total_time)[1]
+	for entryb in interval_list:
+		counter = counter + 1
+		if counter % limit != 0 and counter != 1:
+			interval_list[counter-1]['datetime'] = ""
+		else:
+			interval_list[counter-1]['datetime'] = round(convertTimeBased(float(int(time.time()) - entryb['datetime']), axis_listing), 1)
+	return (interval_list, axis_listing)
+
+#Credit: Lauritz V. Thaulow
+def takeClosest(myList, myNumber):
+    #Assumes myList is sorted. Returns closest value to myNumber.
+    #If two numbers are equally close, return the smallest number.
+
+    pos = bisect_left(myList, myNumber)
+    if pos == 0:
+        return myList[0]
+    if pos == len(myList):
+        return myList[-1]
+    before = myList[pos - 1]
+    after = myList[pos]
+    if after - myNumber < myNumber - before:
+       return after
+    else:
+       return before
+
+def convertTime(seconds):
+	constant = 100
+	if seconds < constant:
+		return (seconds, "Seconds")
+	elif seconds < constant * 60:
+		return (seconds/60, "Minutes")
+	elif seconds < constant * 3600:
+		return (seconds/3600, "Hours")
+	elif seconds < constant * 86400:
+		return (seconds/86400, "Days")
+	elif seconds < constant * 2626560:
+		return (seconds/2626560, "Months")
+	else:
+		return (seconds/31518720, "Years")
+
+def convertTimeBased(seconds, typ):
+	if typ == "Seconds":
+		return seconds
+	elif typ == "Minutes":
+		return seconds/60
+	elif typ == "Hours":
+		return seconds/3600
+	elif typ == "Days":
+		return seconds/86400
+	elif typ == "Months":
+		return seconds/2626560
+	elif typ == "Years":
+		return seconds/31518720
+	print("CRITICAL ERROR")

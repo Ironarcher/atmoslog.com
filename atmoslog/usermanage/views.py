@@ -146,7 +146,48 @@ def user_page(request):
 		return HttpResponseRedirect('/login/?next=/account/')
 
 def changepassword_view(request):
-	pass
+	if request.user.is_authenticated():
+		issues = []
+		oldpassword = newpassword = newpassword_confirm = ""
+		if request.method == "POST":
+			first = False
+			oldpassword = request.POST['oldpassword']
+			newpassword = request.POST['newpassword']
+			newpassword_confirm = request.POST['newpassword_confirm']
+			user = authenticate(username=request.user.get_username(), password=oldpassword)
+			if user is None:
+				#Wrong old password
+				issues.append("wrong_password")
+			elif not user.is_active:
+				#User is not active
+				issues.append("user_inactive")
+			if len(newpassword) < 6 or len(newpassword) > 50:
+				#Password must be 6-50 characters long
+				issues.append("password_length")
+			if newpassword != newpassword_confirm:
+				#New passwords do not match
+				issues.append("password_match")
+
+			#Change the user's password
+			if len(issues) == 0:
+				user.set_password(newpassword)
+				user.save()
+				#TODO: Send email that your password has been changed
+				#If the password change was not you, reset the account (lock)
+				return HttpResponseRedirect("/account/")
+		else:
+			first = True
+
+		context = {
+			"issues" : issues,
+			"first" : first,
+			"oldpassword_init" : oldpassword,
+			"newpassword_init" : newpassword,
+			"newpassword_confirm_init" : newpassword_confirm,
+		}
+		return render(request, 'usermanage/change_password.html', context)
+	else:
+		return HttpResponseRedirect('/login/?next=/changepassword/')
 
 def reset_view(request):
 	pass

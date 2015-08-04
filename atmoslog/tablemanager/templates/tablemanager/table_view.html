@@ -39,10 +39,20 @@
 }
 #legend {
 	margin-top: 50px;
+	position: relative;
 }
 #graph_header{
 	margin-top: 0px;
 	margin-bottom: -7px;
+}
+#graph_header_2{
+	margin-top: -5px;
+	margin-bottom: -7px;
+}
+.vertical-text{
+    margin-top: 90px;
+    float: right;
+    margin-right: -27px;
 }
 {% endblock %}
 
@@ -213,7 +223,7 @@ $(document).ready(function(){
 						</table>
 					</div>
 					<div class="col-md-7">
-						<h3 class="text-center" id="graph_header">Frequency graph</h3>
+						<h3 class="text-center" id="graph_header">Log Frequency</h3>
 						<hr>
 						{% if logcount != 0 %}
 						<div class="row">
@@ -227,12 +237,15 @@ $(document).ready(function(){
 							</div>
 							{% endif %}
 						</div>
+					</br>
+						<h3 class="text-center" id="graph_header_2">Logs Inserted over Time</h3>
+						<hr style="margin-bottom: 5px;">
 						<div class="row">
 							<div class="col-md-12">
 								<div id="canvas-holder2 text-center" style="width:100%">
 									<canvas id="timeGraph" width="200" height="100"></canvas>
 								</div>
-									
+								<p class="text-center" style="margin-top: -10px">{{ time_scale }} ago</p>
 							</div>
 						</div>
 					</div>
@@ -304,6 +317,8 @@ $(document).ready(function(){
 						responsive: true,
 						showTooltips: false,
 						pointDot: false,
+						scaleLabel: " <%=value%>",
+						scaleFontFamily: 'Segoe UI',
 					});
 				};
 
