@@ -15,6 +15,10 @@
 }
 {% endblock %}
 
+{% block create_table_url %}
+"/log/{{ specific_project }}/"
+{% endblock %}
+
 {% block inside %}
 <div class="panel panel-default">
 	<div class="panel-heading"><p id="head_one" class="inline">Project details</p><p id="head_two" class="text-right">Status: {{ project_status }}</div>
@@ -159,11 +163,11 @@
 						                <input type="hidden" name="formtype" value="change_status" />
 					            	</form>
 					            	{% endif %}
-				            	</div>
-				            </div>
-				        </div>
-				    </div>
-				</div>
+				            	</div> <!-- panel body -->
+				            </div> <!-- panel -->
+				        </div> <!-- column -->
+				    </div> <!-- row -->
+				</div> <!-- tab pane -->
 			</div>
 		</div>
 	</div>

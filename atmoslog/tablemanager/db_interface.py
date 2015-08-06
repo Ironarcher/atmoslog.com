@@ -355,7 +355,11 @@ def getTimeGraph_alltime(projectname, tablename):
 	interval_list = []
 	#For finding the best fits for existing log datetimes
 	temp_list = []
-	set_int = total_time/intervals
+	#Bad code
+	if total_time < 1:
+		set_int = 1.0/200
+	else:
+		set_int = total_time/intervals
 	for i in range(int(intervals)):
 		interval_list.append({"datetime" : (first_time + set_int*i), "count" : 0})
 		temp_list.append(first_time + set_int*i)

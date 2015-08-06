@@ -44,6 +44,15 @@ def projectlog(request, projectname, tablename):
 
 	issues = []
 	newname = quanqual = discretecontinuous = ""
+	tables = db_interface.gettables(projectname)
+	name = projectname + '-' + tablename
+	revisedtables = []
+	#Cut off x characters from tablename to display
+	#x = length of project name and the hyphen
+	length = len(projectname) + 1
+	for table in tables:
+		revisedtables.append(table[length:])
+
 	if request.method == "POST":
 			first = False
 			newname = request.POST['name']
@@ -52,6 +61,8 @@ def projectlog(request, projectname, tablename):
 				issues.append("name_length")
 			if re.match('^\w+$', newname) is None and len(newname) != 0:
 				issues.append("name_char")
+			if newname in revisedtables:
+				issues.append("name_taken")
 
 			if len(issues) == 0:
 				#Create the table type to help with graphing later
@@ -61,96 +72,84 @@ def projectlog(request, projectname, tablename):
 		quanqual = db_interface.getTabletypeDefault(projectname)
 		first = True
 
-	tables = db_interface.gettables(projectname)
-	if len(tables) == 0:
-		raise Http404("Project does not exist.")
-	else:
-		name = projectname + '-' + tablename
-		revisedtables = []
-		#Cut off x characters from tablename to display
-		#x = length of project name and the hyphen
-		length = len(projectname) + 1
-		for table in tables:
-			revisedtables.append(table[length:])
-
-		logset = db_interface.findlogs(projectname, tablename, 100)
-		total_in_logset = len(logset)
-		loglists = []
-		for i in range(10):
-			newlist = []
-			for l in range(10):
-				if 10*i+l < total_in_logset:
-					newlist.append(logset[(10*i)+l])
-				else:
-					newlist.append("")
-			loglists.append(newlist)
-
-		finalloglist = zip(loglists[0], loglists[1], loglists[2],
-			loglists[3], loglists[4], loglists[5], loglists[6],
-			loglists[7], loglists[8], loglists[9])
-
-		rows =  db_interface.getFrequency_limit(projectname, tablename, 10)
-		log_row = []
-		log_count = []
-		for row in rows:
-			if 'Other' in row:
-				log_row.append("Other")
-				log_count.append(row['Other'])
+	logset = db_interface.findlogs(projectname, tablename, 100)
+	total_in_logset = len(logset)
+	loglists = []
+	for i in range(10):
+		newlist = []
+		for l in range(10):
+			if 10*i+l < total_in_logset:
+				newlist.append(logset[(10*i)+l])
 			else:
-				log_row.append(row['log'])
-				log_count.append(row['count'])
-		freq_log = zip(log_row, log_count)
+				newlist.append("")
+		loglists.append(newlist)
 
-		tot_logs = db_interface.getlogcount(projectname, tablename)
-		ch1_data = []
-		type_amt = 0
-		if tot_logs > 0:
-			rows2 = db_interface.getFrequency_limit(projectname, tablename, 4)
-			for row in rows2:
-				type_amt = type_amt + 1
-				if 'Other' in row:
-					ch1_data.append("Other")
-					percentage = (float(row['Other'])/tot_logs)*100
-					ch1_data.append(round(percentage))
-				else:
-					if row['log'] is not None:
-						if row['log'].isspace():
-							ch1_data.append("blank")
-						else:
-							ch1_data.append(row['log'])
-					percentage = (float(row['count'])/tot_logs)*100
-					ch1_data.append(round(percentage))
+	finalloglist = zip(loglists[0], loglists[1], loglists[2],
+		loglists[3], loglists[4], loglists[5], loglists[6],
+		loglists[7], loglists[8], loglists[9])
 
-		ch2_data = db_interface.getTimeGraph_alltime(projectname, tablename)
-
-		context = {
-			'specific_project' : projectname, 
-			'tablelist' : revisedtables,
-			'specific_table' : tablename,
-			'logs' : finalloglist,
-			'logcount' : tot_logs,
-			'username' : user,
-			'first' : first,
-			'newname' : newname,
-			'quanqual' : quanqual,
-			'discretecontinuous' : discretecontinuous,
-			'issues' : issues,
-			'projectlist' : projectlist,
-			'myproject' : myproject,
-			'freq_log' : freq_log,
-			'ch1_data' : ch1_data,
-			'type_amt' : type_amt,
-			'tooltipTemplate' : '"<%=label%>: <%= value %>%"',
-			'endtime' : int(time.time()),
-			'ch2_data' : ch2_data[0],
-			'time_scale' : ch2_data[1],
-		}
-
-		if name in tables:
-			return render(request, 'tablemanager/table_view.html', context)
+	rows =  db_interface.getFrequency_limit(projectname, tablename, 10)
+	log_row = []
+	log_count = []
+	for row in rows:
+		if 'Other' in row:
+			log_row.append("Other")
+			log_count.append(row['Other'])
 		else:
-			#raise Http404("Table in this project does not exist.")
-			return render(request, 'tablemanager/table_does_not_exist.html', context)
+			log_row.append(row['log'])
+			log_count.append(row['count'])
+	freq_log = zip(log_row, log_count)
+
+	tot_logs = db_interface.getlogcount(projectname, tablename)
+	ch1_data = []
+	type_amt = 0
+	if tot_logs > 0:
+		rows2 = db_interface.getFrequency_limit(projectname, tablename, 4)
+		for row in rows2:
+			type_amt = type_amt + 1
+			if 'Other' in row:
+				ch1_data.append("Other")
+				percentage = (float(row['Other'])/tot_logs)*100
+				ch1_data.append(round(percentage))
+			else:
+				if row['log'] is not None:
+					if row['log'].isspace():
+						ch1_data.append("blank")
+					else:
+						ch1_data.append(row['log'])
+				percentage = (float(row['count'])/tot_logs)*100
+				ch1_data.append(round(percentage))
+	print('yo')
+	ch2_data = db_interface.getTimeGraph_alltime(projectname, tablename)
+
+	context = {
+		'specific_project' : projectname, 
+		'tablelist' : revisedtables,
+		'specific_table' : tablename,
+		'logs' : finalloglist,
+		'logcount' : tot_logs,
+		'username' : user,
+		'first' : first,
+		'newname' : newname,
+		'quanqual' : quanqual,
+		'discretecontinuous' : discretecontinuous,
+		'issues' : issues,
+		'projectlist' : projectlist,
+		'myproject' : myproject,
+		'freq_log' : freq_log,
+		'ch1_data' : ch1_data,
+		'type_amt' : type_amt,
+		'tooltipTemplate' : '"<%=label%>: <%= value %>%"',
+		'endtime' : int(time.time()),
+		'ch2_data' : ch2_data[0],
+		'time_scale' : ch2_data[1],
+	}
+
+	if name in tables:
+		return render(request, 'tablemanager/table_view.html', context)
+	else:
+		#raise Http404("Table in this project does not exist.")
+		return render(request, 'tablemanager/table_does_not_exist.html', context)
 
 def create(request):
 	if not request.user.is_authenticated():
@@ -237,6 +236,12 @@ def project_settings(request, projectname):
 		raise Http404("Project does not exist.")
 	else:
 		projectfile = db_interface.getProject(projectname)
+		revisedtables = []
+		#Cut off x characters from tablename to display
+		#x = length of project name and the hyphen
+		length = len(projectname) + 1
+		for table in tables:
+			revisedtables.append(table[length:])
 
 	#Verify post results and handle forms
 	issues = []
@@ -257,10 +262,16 @@ def project_settings(request, projectname):
 				issues.append("name_length")
 			if re.match('^\w+$', newname) is None and len(newname) != 0:
 				issues.append("name_char")
-
+			if newname in revisedtables:
+				print('issues')
+				issues.append("name_taken")
+			print('test123')
+			print(revisedtables)
+			print(newname)
 			if len(issues) == 0:
 				#Create the table type to help with graphing later
 				db_interface.createTable(projectname, newname, quanqual)
+				print('emergency')
 				return HttpResponseRedirect('/log/%s/%s/' % (projectname, newname))
 		elif request.POST['formtype'] == 'edit_project':
 			first = True
@@ -310,13 +321,6 @@ def project_settings(request, projectname):
 		quanqual = db_interface.getTabletypeDefault(projectname)
 		first = True
 		edit_first = True
-
-	revisedtables = []
-	#Cut off x characters from tablename to display
-	#x = length of project name and the hyphen
-	length = len(projectname) + 1
-	for table in tables:
-		revisedtables.append(table[length:])
 
 	context = {
 		'specific_project' : projectname, 

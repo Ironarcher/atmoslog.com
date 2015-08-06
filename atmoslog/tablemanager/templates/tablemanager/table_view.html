@@ -327,7 +327,90 @@ $(document).ready(function(){
 
 			<!-- Settinsg page -->
 			<div id="settings" class="tab-pane fade settings">
+				<h3 class="text-center">Edit project</h3>
+					<div class="row">
+						<div class="col-md-6 col-md-offset-3">
+							{% if "name_length" in issues2%}
+					            <div class="alert alert-warning">
+					                <p class="text-center">The project name must be between 4 and 50 characters.</p>
+					            </div>
+					        {% endif %}
+					        {% if "name_char" in issues2%}
+					            <div class="alert alert-warning">
+					               <p class="text-center">The project name can only contain alphanumeric characters and underscores.</p>
+					            </div>
+					        {% endif %}
+					        {% if "description_length" in issues2%}
+					            <div class="alert alert-warning">
+					               <p class="text-center">The project description must be less than 500 characters.</p>
+					            </div>
+					        {% endif %}
+					        {% if "name_taken" in issues2%}
+					            <div class="alert alert-warning">
+					               <p class="text-center">This table name already exists.</p>
+					            </div>
+					        {% endif %}
 
+							<form method="post" action="/log/{{ specific_project }}/" role="form">
+				                {% csrf_token %}
+				                {% if "name_char" in issues2 or "name_length" in issues2 or "name_taken" in issues2 %}
+				                    <div class="form-group has-error has-feedback">
+				                {% elif not edit_first %}
+				                    <div class="form-group has-success has-feedback">
+				                {% else %}
+				                    <div class="form-group">
+				                {% endif %}
+				                    <label for="edit_name">Project Name</label>
+				                    <input type="text" class="form-control" id="edit_name" name="edit_name" value={{ edit_name }}>
+				                {% if "name_char" in issues2 or "name_length" in issues2 or "name_taken" in issues2 %}
+				                    <span class="glyphicon glyphicon-remove form-control-feedback"></span>
+				                {% elif not edit_first %}
+				                    <span class="glyphicon glyphicon-ok form-control-feedback"></span>
+				                {% endif %}
+				                </div>
+
+				                <div class="form-group">
+				                	<label for"edit_quanqual">Table Type:</label>
+					                <select class="form-control" id="edit_quanqual" name="edit_quanqual" title="edit_quanqual">
+					                	{% if edit_default_tabletype == "qualitative" %}
+					                		<option value="qualitative">Qualitative</option>
+					                		<option value="quantitative_discrete">Quantitative Discrete</option>
+					                		<option value="quantitative_continuous">Quantitative Continuous</option>
+					                	{% elif edit_default_tabletype == "quantitative_discrete" %}
+					                		<option value="quantitative_discrete">Quantitative Discrete</option>
+					                		<option value="quantitative_continuous">Quantitative Continuous</option>
+					                		<option value="qualitative">Qualitative</option>
+					                	{% elif edit_default_tabletype == "quantitative_continuous" %}
+					                		<option value="quantitative_continuous">Quantitative Continuous</option>
+					                		<option value="qualitative">Qualitative</option>
+					                		<option value="quantitative_discrete">Quantitative Discrete</option>
+					                	{% endif %}
+					                </select>
+				           		</div>
+
+				                <div class="text-center">
+				                    <button type="submit" value="update" class="btn btn-default">Update</button>
+				                </div>
+				                <input type="hidden" name="formtype" value="edit_project" />
+				            </form>
+
+				        </br>
+				            <div class="panel panel-warning">
+				            	<div class="panel-heading">
+									<h3 class="panel-title">Project Control</h3>
+								</div>
+				            	<div class="panel-body">
+					            	<form method="post" action="/log/{{ specific_project }}/{{ tablename }}" role="form">
+					                	{% csrf_token %}
+					                	<div class="text-center">
+						                    <button type="submit" value="update" class="btn btn-danger">Delete and Refund Table</button>
+						                </div>
+						                <input type="hidden" name="formtype" value="reset_key" />
+					            	</form>
+				            	</div> <!-- panel body -->
+				            </div> <!-- panel -->
+				        </div> <!-- column -->
+				    </div> <!-- row -->
 			</div>
 		</div> <!-- tab content -->
 	</div> <!-- panel body -->
