@@ -43,6 +43,7 @@ def projectlog(request, projectname, tablename):
 		return HttpResponseRedirect('/login?next=/log/%s/%s/' % (projectname, tablename))
 
 	issues = []
+	issues2 = []
 	newname = quanqual = discretecontinuous = ""
 	tables = db_interface.gettables(projectname)
 	name = projectname + '-' + tablename
@@ -53,8 +54,14 @@ def projectlog(request, projectname, tablename):
 	for table in tables:
 		revisedtables.append(table[length:])
 
+	edit_name = tablename
+	edit_tabletype = db_interface.getTabletype(projectname, tablename)
+	default_tab = "analysis"
+
 	if request.method == "POST":
+		if request.POST['formtype'] == 'create_table':
 			first = False
+			edit_first = True
 			newname = request.POST['name']
 			quanqual = request.POST['quanqual']
 			if len(newname) > 50 or len(newname) < 3:
@@ -68,9 +75,34 @@ def projectlog(request, projectname, tablename):
 				#Create the table type to help with graphing later
 				db_interface.createTable(projectname, newname, quanqual)
 				return HttpResponseRedirect('/log/%s/%s/' % (projectname, newname))
+		elif request.POST['formtype'] == 'edit_table':
+			first = True
+			edit_first = False
+			edit_name = request.POST['edit_name']
+			edit_tabletype = request.POST['edit_quanqual']
+
+			if len(edit_name) < 4 or len(edit_name) > 50:
+				#Table name must be 4-50 characters long.
+				issues2.append("name_length")
+			if re.match('^\w+$', edit_name) is None and len(edit_name) != 0:
+				#Table name can only contain characters and numbers and underscores.
+				issues2.append("name_char")
+			if edit_name in revisedtables:
+				issues2.append("name_taken")
+
+			#Update the project:
+			if len(issues2) == 0:
+				db_interface.updateTable(projectname, tablename, edit_name, edit_tabletype)
+				return HttpResponseRedirect('/log/%s/%s/' % (projectname, edit_name))
+			else:
+				default_tab = "settings"
+		elif request.POST['formtype'] == 'delete_table':
+			db_interface.deleteTable(projectname, tablename)
+			return HttpResponseRedirect('/log/%s' % projectname)
 	else:
 		quanqual = db_interface.getTabletypeDefault(projectname)
 		first = True
+		edit_first = True
 
 	logset = db_interface.findlogs(projectname, tablename, 100)
 	total_in_logset = len(logset)
@@ -143,6 +175,11 @@ def projectlog(request, projectname, tablename):
 		'endtime' : int(time.time()),
 		'ch2_data' : ch2_data[0],
 		'time_scale' : ch2_data[1],
+		'edit_first' : edit_first,
+		'issues2' : issues2,
+		'edit_name' : edit_name,
+		'edit_tabletype' : edit_tabletype,
+		'default_tab' : default_tab,
 	}
 
 	if name in tables:
@@ -263,11 +300,7 @@ def project_settings(request, projectname):
 			if re.match('^\w+$', newname) is None and len(newname) != 0:
 				issues.append("name_char")
 			if newname in revisedtables:
-				print('issues')
 				issues.append("name_taken")
-			print('test123')
-			print(revisedtables)
-			print(newname)
 			if len(issues) == 0:
 				#Create the table type to help with graphing later
 				db_interface.createTable(projectname, newname, quanqual)

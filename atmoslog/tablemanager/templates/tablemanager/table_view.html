@@ -61,7 +61,10 @@
 $(document).ready(function(){
 	$('#tabledrop li a').click(function(event){
 		$('.dropdown-menu li.active').removeClass('active');
-	})
+	});
+	$('#deletetable').click(function(event){
+		return window.confirm("Are you sure you want to delete this table? All data will be irreversibly erased.");
+	});
 });
 
 {% endblock %}
@@ -73,8 +76,8 @@ $(document).ready(function(){
 		<div class="col-md-12 text-center">
 			<ul class="nav nav-pills center-pills">
 			  <li role="presentation"><a href=".logs" data-toggle="pill" data-target=".logs">Logs</a></li>
-			  <li role="presentation" class="active"><a href=".analysis" data-toggle="pill" data-target=".analysis">Analysis</a></li>
-			  <li role="presentation"><a href=".settings" data-toggle="pill" data-target=".settings">Settings</a></li>
+			  <li role="presentation" {% if default_tab == "analysis" %}class="active"{% endif %}><a href=".analysis" data-toggle="pill" data-target=".analysis">Analysis</a></li>
+			  <li role="presentation" {% if default_tab == "settings" %}class="active"{% endif %}><a href=".settings" data-toggle="pill" data-target=".settings">Settings</a></li>
 			</ul>
 		</div>
 
@@ -196,7 +199,7 @@ $(document).ready(function(){
 			</div> <!-- tab pane -->
 			
 			<!-- Analysis page -->
-			<div id="analysis" class="tab-pane fade in active analysis">
+			<div id="analysis" class="tab-pane fade {% if default_tab == "analysis" %}in active{% endif %} analysis">
 				<div class="row">
 					<div class="col-md-5">
 						<table class="table">
@@ -235,9 +238,10 @@ $(document).ready(function(){
 							<div class="col-md-5">
 								<div id="legend"></div>
 							</div>
-							{% endif %}
 						</div>
+						{% endif %}
 					</br>
+						{% if logcount != 0 %}
 						<h3 class="text-center" id="graph_header_2">Logs Inserted over Time</h3>
 						<hr style="margin-bottom: 5px;">
 						<div class="row">
@@ -248,8 +252,10 @@ $(document).ready(function(){
 								<p class="text-center" style="margin-top: -10px">{{ time_scale }} ago</p>
 							</div>
 						</div>
+						{% endif %}
 					</div>
 				</div>
+				{% if logcount != 0 %}
 				<script>
 					//Scripts for graphs
 					var doughnutData = [
@@ -323,26 +329,23 @@ $(document).ready(function(){
 				};
 
 				</script>
+				{% endif %}
 			</div>
 
 			<!-- Settinsg page -->
-			<div id="settings" class="tab-pane fade settings">
-				<h3 class="text-center">Edit project</h3>
+			<div id="settings" class="tab-pane fade {% if default_tab == "settings" %}in active{% endif %} settings">
+			</br></br>
+				<h3 class="text-center">Edit table</h3>
 					<div class="row">
 						<div class="col-md-6 col-md-offset-3">
 							{% if "name_length" in issues2%}
 					            <div class="alert alert-warning">
-					                <p class="text-center">The project name must be between 4 and 50 characters.</p>
+					                <p class="text-center">The table name must be between 4 and 50 characters.</p>
 					            </div>
 					        {% endif %}
 					        {% if "name_char" in issues2%}
 					            <div class="alert alert-warning">
-					               <p class="text-center">The project name can only contain alphanumeric characters and underscores.</p>
-					            </div>
-					        {% endif %}
-					        {% if "description_length" in issues2%}
-					            <div class="alert alert-warning">
-					               <p class="text-center">The project description must be less than 500 characters.</p>
+					               <p class="text-center">The table name can only contain alphanumeric characters and underscores.</p>
 					            </div>
 					        {% endif %}
 					        {% if "name_taken" in issues2%}
@@ -351,7 +354,7 @@ $(document).ready(function(){
 					            </div>
 					        {% endif %}
 
-							<form method="post" action="/log/{{ specific_project }}/" role="form">
+							<form method="post" action="/log/{{ specific_project }}/{{ specific_table }}/" role="form">
 				                {% csrf_token %}
 				                {% if "name_char" in issues2 or "name_length" in issues2 or "name_taken" in issues2 %}
 				                    <div class="form-group has-error has-feedback">
@@ -372,15 +375,15 @@ $(document).ready(function(){
 				                <div class="form-group">
 				                	<label for"edit_quanqual">Table Type:</label>
 					                <select class="form-control" id="edit_quanqual" name="edit_quanqual" title="edit_quanqual">
-					                	{% if edit_default_tabletype == "qualitative" %}
+					                	{% if edit_tabletype == "qualitative" %}
 					                		<option value="qualitative">Qualitative</option>
 					                		<option value="quantitative_discrete">Quantitative Discrete</option>
 					                		<option value="quantitative_continuous">Quantitative Continuous</option>
-					                	{% elif edit_default_tabletype == "quantitative_discrete" %}
+					                	{% elif edit_tabletype == "quantitative_discrete" %}
 					                		<option value="quantitative_discrete">Quantitative Discrete</option>
 					                		<option value="quantitative_continuous">Quantitative Continuous</option>
 					                		<option value="qualitative">Qualitative</option>
-					                	{% elif edit_default_tabletype == "quantitative_continuous" %}
+					                	{% elif edit_tabletype == "quantitative_continuous" %}
 					                		<option value="quantitative_continuous">Quantitative Continuous</option>
 					                		<option value="qualitative">Qualitative</option>
 					                		<option value="quantitative_discrete">Quantitative Discrete</option>
@@ -391,7 +394,7 @@ $(document).ready(function(){
 				                <div class="text-center">
 				                    <button type="submit" value="update" class="btn btn-default">Update</button>
 				                </div>
-				                <input type="hidden" name="formtype" value="edit_project" />
+				                <input type="hidden" name="formtype" value="edit_table" />
 				            </form>
 
 				        </br>
@@ -400,12 +403,12 @@ $(document).ready(function(){
 									<h3 class="panel-title">Project Control</h3>
 								</div>
 				            	<div class="panel-body">
-					            	<form method="post" action="/log/{{ specific_project }}/{{ tablename }}" role="form">
+					            	<form method="post" action="/log/{{ specific_project }}/{{ specific_table }}/" role="form">
 					                	{% csrf_token %}
 					                	<div class="text-center">
-						                    <button type="submit" value="update" class="btn btn-danger">Delete and Refund Table</button>
+						                    <button type="submit" value="delete" class="btn btn-danger" id="deletetable">Delete Table</button>
 						                </div>
-						                <input type="hidden" name="formtype" value="reset_key" />
+						                <input type="hidden" name="formtype" value="delete_table" />
 					            	</form>
 				            	</div> <!-- panel body -->
 				            </div> <!-- panel -->
