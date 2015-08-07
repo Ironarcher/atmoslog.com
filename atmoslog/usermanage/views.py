@@ -77,12 +77,15 @@ def register_view(request):
 		if re.match("^[A-Za-z]*$", lastname) is None:
 			#Names can only contain letters and spaces
 			issues.append("lastname_char")
-		if re.match("^[A-Za-z@.]*$", email) is None or len(email) < 3:
+		if re.match("^[A-Za-z0-9@.]*$", email) is None or len(email) < 3:
 			#Email invalid
 			issues.append("email_char")
 		if check_user_exists(username):
 			#User already exists
 			issues.append("username_taken")
+		if check_email_exists(email):
+			#Email is already being used
+			issues.append("email_taken")
 
 		#Sign the user up
 		if len(issues) == 0:
@@ -91,8 +94,9 @@ def register_view(request):
 				user.first_name = firstname
 			if len(lastname) != 0:
 				user.last_name = lastname
-			user.userprofile.about_me = ""
-			user.userprofile.fav_language = "?"
+			user.profile.about_me = ""
+			user.profile.fav_language = "?"
+			user.profile.addPicture()
 			user.save()
 			#Redirect the user to the verification process
 			#TO-DO
@@ -123,12 +127,10 @@ def user_page(request):
 		firstname = userobj.first_name
 		lastname = userobj.last_name
 		email = userobj.email
-		about_me = ""
-		favorite_language = "Python"
-		join_date = "Forever"
-		#about_me = userobj.get_profile().about_me
-		#favorite_language = userobj.userprofile.fav_language
-		#join_date = userobj.userprofile.joined_on
+		about_me = userobj.profile.about_me
+		favorite_language = userobj.profile.fav_language
+		join_date = userobj.profile.joined_on
+		profile_picture = userobj.profile.picture
 
 		context = {
 		"authenticated" : authenticated,
@@ -140,6 +142,7 @@ def user_page(request):
 		"favorite_language" : favorite_language,
 		"join_date" : join_date,
 		"user_projects" : db_interface.getUserProjects(username),
+		"profile_picture" : profile_picture
 		}
 		return render(request, 'usermanage/account.html', context)
 	else:
@@ -197,3 +200,18 @@ def check_user_exists(username):
 		return True
 	else:
 		return False
+
+def check_email_exists(email):
+	if User.objects.filter(email=email).exists():
+		return True
+	else:
+		return False
+
+'''
+def get_gravatar(user):
+	userobj = User.objects.get(username=user)
+	email = userobj.email
+
+	#Create url to get the get_profile
+	profilepic = 
+'''

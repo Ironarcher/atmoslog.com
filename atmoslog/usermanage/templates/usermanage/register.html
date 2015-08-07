@@ -54,6 +54,11 @@
                 <p class="text-center">The email is invalid.</p>
             </div>
         {% endif %}
+        {% if "email_taken" in issues%}
+            <div class="alert alert-warning">
+                <p class="text-center">This email is already being used.</p>
+            </div>
+        {% endif %}
 
         <h3 class="text-center">Register</h3>
         <div class="well">
@@ -123,7 +128,7 @@
                 {% endif %}
                 </div>
 
-                {% if "email_char" in issues %}
+                {% if "email_char" in issues or "email_taken" in issues %}
                     <div class="form-group has-error has-feedback">
                 {% elif not first %}
                     <div class="form-group has-success has-feedback">
@@ -132,7 +137,7 @@
                 {% endif %}
                     <label for="email">Email</label>
                     <input type="text" class="form-control" id="email" name="email">
-                {% if "email_char" in issues %}
+                {% if "email_char" in issues or "email_taken" in issues %}
                     <span class="glyphicon glyphicon-remove form-control-feedback"></span>
                 {% elif not first %}
                     <span class="glyphicon glyphicon-ok form-control-feedback"></span>
