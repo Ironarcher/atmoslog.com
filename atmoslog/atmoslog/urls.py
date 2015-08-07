@@ -23,9 +23,9 @@ urlpatterns = [
     #url(r'^about/', include('atmoslog_main.urls')),
     url(r'^docs/', include('atmoslog_docs.urls')),
     url(r'^pricing/$', 'atmoslog_main.views.pricing'),
-    url(r'^settings/$', 'tablemanager.views.settings'),
     url(r'^search/$', 'tablemanager.views.search'),
     url(r'^api/', include('logapi.urls')),
+    url(r'^updates/', include('blog.urls')),
 
     #User controls
     url(r'^login/$', 'usermanage.views.login_view'),
@@ -34,5 +34,5 @@ urlpatterns = [
     url(r'^register/$', 'usermanage.views.register_view'),
     url(r'^create/$', 'tablemanager.views.create'),
     url(r'^changepassword/$', 'usermanage.views.changepassword_view'),
-    url(r'^reset/$', 'usermanage.view.reset_view'),
+    url(r'^reset/$', 'usermanage.views.reset_view'),
 ]
