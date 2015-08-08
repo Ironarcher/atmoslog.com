@@ -41,7 +41,7 @@
 	margin-top: 50px;
 	position: relative;
 }
-#graph_header{
+.graph_header{
 	margin-top: 0px;
 	margin-bottom: -7px;
 }
@@ -226,10 +226,15 @@ $(document).ready(function(){
 						</table>
 					</div>
 					<div class="col-md-7">
-						<h3 class="text-center" id="graph_header">Log Frequency</h3>
+						{% if edit_tabletype != "quantitative_continuous" %}
+						<h3 class="text-center" class="graph_header">Log Frequency</h3>
+						{% else %}
+						<h3 class="text-center" class="graph_header">Total Logs in Ranges</h3>
+						{% endif %}
 						<hr>
 						{% if logcount != 0 %}
 						<div class="row">
+							{% if edit_tabletype != "quantitative_continuous" %}
 							<div class="col-md-7">
 								<div id="canvas-holder">
 									<canvas id="frequency-chart" width="500" height="400"></canvas>
@@ -238,6 +243,14 @@ $(document).ready(function(){
 							<div class="col-md-5">
 								<div id="legend"></div>
 							</div>
+							{% else %}
+							<!-- for quantitative continuous data -->
+							<div class="col-md-12">
+								<div id="canvas-holder3">
+									<canvas id="histogram-chart" width="200" height="100"></canvas>
+								</div>
+							</div>
+							{% endif %}
 						</div>
 						{% endif %}
 					</br>
@@ -257,6 +270,20 @@ $(document).ready(function(){
 				</div>
 				{% if logcount != 0 %}
 				<script>
+					{% if edit_tabletype == "quantitative_continuous" %}
+					var histogramData = {
+					labels: [{% for entry in ch3_data %}"{{ entry.value }}", {% endfor %}],
+					datasets : [
+						{
+							fillColor : "rgba(151,187,205,0.2)",
+							strokeColor : "rgba(151,187,205,1)",
+							highlightFill : "rgba(151,187,205,0.75)",
+							highlightStroke : "rgba(151,187,205,1)",
+
+							data : [{% for entry in ch3_data %}{{ entry.count }}, {% endfor %}],
+						}]
+					}
+					{% else %}
 					//Scripts for graphs
 					var doughnutData = [
 					{
@@ -293,6 +320,7 @@ $(document).ready(function(){
 					}
 					{% endif %}
 				];
+				{% endif %}
 				var lineChartData = {
 					labels: [{% for entry in ch2_data %}"{{ entry.datetime }}", {% endfor %}],
 					datasets : [
@@ -308,6 +336,14 @@ $(document).ready(function(){
 						}]
 				}
 				window.onload = function(){
+					{% if edit_tabletype == "quantitative_continuous" %}
+					var ctx3 = document.getElementById("histogram-chart").getContext("2d");
+					window.histogramChart = new Chart(ctx3).Bar(histogramData, {
+						responsive: true,
+						animationSteps: 70,
+				    	animationEasing: "easeOutQuint",
+					});
+					{% else %}
 					//Doughnut graph
 					var ctx = document.getElementById("frequency-chart").getContext("2d");
 					window.myDoughnut = new Chart(ctx).Doughnut(doughnutData, {
@@ -317,6 +353,7 @@ $(document).ready(function(){
 				    	animationEasing: "easeOutQuint",
 					});
 					document.getElementById('legend').innerHTML = window.myDoughnut.generateLegend();
+					{% endif %}
 					//Line graph
 					var ctx2 = document.getElementById("timeGraph").getContext("2d");
 					window.myLine = new Chart(ctx2).Line(lineChartData, {
@@ -325,6 +362,8 @@ $(document).ready(function(){
 						pointDot: false,
 						scaleLabel: " <%=value%>",
 						scaleFontFamily: 'Segoe UI',
+						animationSteps: 70,
+				    	animationEasing: "easeOutQuint",
 					});
 				};
 

@@ -88,7 +88,7 @@ def projectlog(request, projectname, tablename):
 			if re.match('^\w+$', edit_name) is None and len(edit_name) != 0:
 				#Table name can only contain characters and numbers and underscores.
 				issues2.append("name_char")
-			if edit_name in revisedtables:
+			if edit_name in revisedtables and edit_name != tablename:
 				issues2.append("name_taken")
 
 			#Update the project:
@@ -136,24 +136,28 @@ def projectlog(request, projectname, tablename):
 	tot_logs = db_interface.getlogcount(projectname, tablename)
 	ch1_data = []
 	type_amt = 0
-	if tot_logs > 0:
-		rows2 = db_interface.getFrequency_limit(projectname, tablename, 4)
-		for row in rows2:
-			type_amt = type_amt + 1
-			if 'Other' in row:
-				ch1_data.append("Other")
-				percentage = (float(row['Other'])/tot_logs)*100
-				ch1_data.append(round(percentage))
-			else:
-				if row['log'] is not None:
-					if row['log'].isspace():
-						ch1_data.append("blank")
-					else:
-						ch1_data.append(row['log'])
-				percentage = (float(row['count'])/tot_logs)*100
-				ch1_data.append(round(percentage))
-	print('yo')
+	ch3_data = []
+
 	ch2_data = db_interface.getTimeGraph_alltime(projectname, tablename)
+	if edit_tabletype == "quantitative_continuous":
+		ch3_data = db_interface.getHistogram(projectname, tablename)
+	else:
+		if tot_logs > 0:
+			rows2 = db_interface.getFrequency_limit(projectname, tablename, 4)
+			for row in rows2:
+				type_amt = type_amt + 1
+				if 'Other' in row:
+					ch1_data.append("Other")
+					percentage = (float(row['Other'])/tot_logs)*100
+					ch1_data.append(round(percentage))
+				else:
+					if row['log'] is not None:
+						if row['log'].isspace():
+							ch1_data.append("blank")
+						else:
+							ch1_data.append(row['log'])
+					percentage = (float(row['count'])/tot_logs)*100
+					ch1_data.append(round(percentage))
 
 	context = {
 		'specific_project' : projectname, 
@@ -181,6 +185,7 @@ def projectlog(request, projectname, tablename):
 		'edit_name' : edit_name,
 		'edit_tabletype' : edit_tabletype,
 		'default_tab' : default_tab,
+		'ch3_data' : ch3_data,
 	}
 
 	if name in tables:
@@ -229,6 +234,14 @@ def create(request):
 			else:
 				access_real = 'private'
 			db_interface.createProject(name, creator, access_final, description)
+
+			#Add this project to liked projects
+			userp = request.user.profile
+			projlist = json.decoder.JSONDecoder().decode(userp.liked_projects)
+			projlist.append(name)
+			userp.liked_projects = json.dumps(projlist)
+			userp.save()
+			db_interface.likeProject(name)
 			return HttpResponseRedirect('/log/%s' % name)
 	else:
 		first = True

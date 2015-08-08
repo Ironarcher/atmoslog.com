@@ -133,12 +133,17 @@ def updateTable(projectname, tablename, newtablename, newtabletype):
 	if newtablename != tablename:
 		db[oldtable].rename(newtable)
 		db[newtable].update({"type" : "description"}, {"$set" : {"tabletype" : newtabletype}})
+	else:
+		db[newtable].update({"type" : "description"}, {"$set" : {"tabletype" : newtabletype}})
 
 def deleteTable(projectname, tablename):
 	name = projectname + "-" + tablename
-	db.drop_collection(tablename)
-	if gettables(projectname) == 0:
-		createTable(projectname, "log", getTabletypeDefault(projectname))
+	if len(gettables(projectname)) == 1:
+		db[name].drop()
+		while(len(gettables(projectname)) == 0):
+			createTable(projectname, "log", getTabletypeDefault(projectname))
+	else:
+		db[name].drop()
 
 def chargeProject(project, amt):
 	projects = db['projects']
@@ -422,6 +427,67 @@ def getTimeGraph_alltime(projectname, tablename):
 		else:
 			interval_list[counter-1]['datetime'] = round(convertTimeBased(float(int(time.time()) - entryb['datetime']), axis_listing), 1)
 	return (interval_list, axis_listing)
+
+def getHistogram(projectname, tablename):
+	#Find the maximum and minimum values
+	minpipeline = [
+		{"$group" : {"_id" : "$type", "min" : {"$min" : "$value"}}},
+	]
+	maxpipeline = [
+		{"$group" : {"_id" : "$type", "max" : {"$max" : "$value"}}},
+	]
+	table = projectname + "-" + tablename
+	minimum = list(db[table].aggregate(minpipeline))
+	maximum = list(db[table].aggregate(maxpipeline))
+	if minimum[0]['_id'] == "log":
+		min_final = float(minimum[0]['min'])
+	elif minimum[1]['_id'] == "log":
+		min_final = float(minimum[1]['min'])
+	else:
+		#Critical error
+		return
+	if maximum[0]['_id'] == "log":
+		max_final = float(maximum[0]['max'])
+	elif maximum[1]['_id'] == "log":
+		max_final = float(maximum[1]['max'])
+	else:
+		#Critical error
+		return
+	
+	#Divide into 10 equal segments
+	count = getlogcount(projectname, tablename)
+	if count < 10:
+		intervals = int(count)
+		interval = (max_final-min_final)/int(count)
+	else:
+		intervals = 10
+		interval = (max_final-min_final)/10
+	interval_list = []
+	temp_list = []
+	for i in range(int(intervals)):
+		interval_list.append({"value" : round(min_final + interval*i, 1), "count" : 0})
+		temp_list.append(round(min_final + interval*i, 1))
+
+	#Add the existing logs to the best fits in the empty sets
+	for entry in db[table].find({"type" : "log"}):
+		closest = takeClosest(temp_list, float(entry['value']))
+		#Code requires optimization
+		for p in interval_list:
+			if float(p['value']) == closest:
+				p['count'] = str(int(p['count']) + 1)
+				break
+
+	#Make the values represent the ranges
+	for q in interval_list:
+		firstnumber = round(float(q['value']), 1)
+		if int(firstnumber) == 0 or firstnumber/int(firstnumber) == 1.0:
+			firstnumber = int(firstnumber)
+		secondnumber = round(float(q['value']) + interval, 1)
+		if int(firstnumber) == 0 or secondnumber/int(secondnumber) == 1.0:
+			secondnumber = int(secondnumber)
+		q['value'] = str(firstnumber) + " - " + str(secondnumber)
+
+	return interval_list
 
 #Credit: Lauritz V. Thaulow
 def takeClosest(myList, myNumber):
