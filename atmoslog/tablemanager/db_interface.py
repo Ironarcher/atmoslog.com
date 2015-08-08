@@ -136,7 +136,9 @@ def updateTable(projectname, tablename, newtablename, newtabletype):
 
 def deleteTable(projectname, tablename):
 	name = projectname + "-" + tablename
-	db.drop_collection(name)
+	db.drop_collection(tablename)
+	if gettables(projectname) == 0:
+		createTable(projectname, "log", getTabletypeDefault(projectname))
 
 def chargeProject(project, amt):
 	projects = db['projects']
@@ -309,6 +311,16 @@ def changeStatus(projectname, status):
 	if status == "running" or status == "stopped" or status == "overdrawn":
 		projects.update({"name" : projectname}, {"$set": {"status" : status}})
 
+def likeProject(projectname):
+	projects = db['projects']
+	projects.update({"name" : projectname}, {"$inc" : {"popularity" : 1}})
+
+def unlikeProject(projectname):
+	projects = db['projects']
+	projectfile = projects.find_one({"name" : projectname})
+	if projectfile['popularity'] > 0:
+		projects.update({"name" : projectname}, {"$inc" : {"popularity" : -1}})
+
 def getFrequency_limit(projectname, tablename, limit):
 	size = getlogcount(projectname, tablename)
 	pipeline = [
@@ -345,7 +357,7 @@ def getFrequency(projectname, tablename):
 	]
 	table = projectname + "-" + tablename
 	first_list =  list(db[table].aggregate(pipeline))
-	for entry in first_list:
+	for entry in first_list: 
 		if entry['_id'] is None:
 			first_list.remove(entry)
 

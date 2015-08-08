@@ -355,6 +355,13 @@ def project_settings(request, projectname):
 		first = True
 		edit_first = True
 
+	#Check if the user has liked the project
+	print(request.user.profile.getProjects())
+	if projectname in request.user.profile.getProjects():
+		liked = True
+	else:
+		liked = False
+
 	context = {
 		'specific_project' : projectname, 
 		'project_description' : projectfile['description'],
@@ -383,6 +390,7 @@ def project_settings(request, projectname):
 		'issues2' : issues2,
 		'projectlist' : projectlist,
 		'myproject' : myproject,
+		'liked' : liked,
 	}
 
 	return render(request, "tablemanager/project_details.html", context)
@@ -429,6 +437,28 @@ def search(request):
 		"results" : projects,
 	}
 	return render(request, 'tablemanager/search.html', context)
+
+def like_project(request):
+	if request.user.is_authenticated():
+		popularity = 0
+		if request.GET:
+			if 'project' in request.GET:
+				project = request.GET['project']
+				if project in request.user.profile.getProjects():
+					#Unlike the project
+					request.user.profile.deleteProject(project)
+					db_interface.unlikeProject(project)
+				else:
+					#Like the project
+					request.user.profile.addProject(project)
+					db_interface.likeProject(project)
+			else:
+				return HttpResponseRedirect('/')
+
+		projectfile = db_interface.getProject(project)
+		return HttpResponse(projectfile['popularity'])
+	else:
+		return HttpResponseRedirect('/')
 
 def check_user_exists(username):
 	if User.objects.filter(username=username).exists():

@@ -8,10 +8,23 @@
 	display: inline-block;
 	float: right;
 	margin-bottom: 0px;
+	margin-top: 0px;
 }
 #head_one {
 	display: inline-block;
 	margin-bottom: 0px;
+}
+#like {
+	display: block;
+	float: right;
+	margin-top:-5px;
+	margin-left: 10px;
+}
+#share{
+	display: block;
+	float: right;
+	margin-top:-5px;
+	margin-left: 10px;
 }
 {% endblock %}
 
@@ -19,9 +32,40 @@
 "/log/{{ specific_project }}/"
 {% endblock %}
 
+{% block addscript %}
+$(document).ready(function() {
+	{% if liked %} var liked = true; {% endif %}
+	{% else %} var liked = false; {% endif %}
+	$('#like').click(function() {
+		if(liked){
+			$.get('/like_project', {project: {% specific_project %}}, function(data){
+				$("#like").html("<span id="likeicon" class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span> Like - " + data);
+			liked = false;
+			//Update class of likeicon to "glyphicon glyphicon-heart"
+			//$("#likeicon")
+			});
+		} else{
+			$.get('/like_project', {project: {% specific_project %}}, function(data){
+				$("#like").html("<span id="likeicon" class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span> Like - " + data);
+			liked = true;
+			//Update class of likeicon to "glyphicon glyphicon-heart-empty"
+			//$("#likeicon")
+		}
+	});
+});
+{% endblock %}
+
 {% block inside %}
 <div class="panel panel-default">
-	<div class="panel-heading"><p id="head_one" class="inline">Project details</p><p id="head_two" class="text-right">Status: {{ project_status }}</div>
+	<div class="panel-heading"><p id="head_one" class="inline">Project details</p>
+		<button id="like" type="button" class="btn btn-default btn-sm">
+		  <span id="likeicon" class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span> Like - {{ project_popularity }}
+		</button>
+		<button id="share" type="button" class="btn btn-default btn-sm">
+		  <span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span> Share
+		</button>
+		<p id="head_two" class="text-right">Status: {{ project_status }}
+	</div>
 		<div class="panel-body">
 			<div class="col-md-12 text-center">
 				<ul class="nav nav-pills center-pills">
@@ -48,7 +92,45 @@
 
 				<div id="funds" class="tab-pane fade">
 					<h3 class="text-center">Add funds</h3>
-				</div>
+					<div class="row">
+						<div class="col-md-4 col-md-offset-4">
+							<div class="form-group">
+				                <div class="radio">
+								  <label>
+								    <input type="radio" name="fundamt" id="2" value="2">
+								    $2
+								  </label>
+								</div>
+								<div class="radio">
+								  <label>
+								    <input type="radio" name="fundamt" id="5" value="2">
+								    $5
+								  </label>
+								</div>
+								<div class="radio">
+								  <label>
+								    <input type="radio" name="fundamt" id="10" value="10">
+								    $10
+								  </label>
+								</div>
+								<div class="radio">
+								  <label>
+								    <input type="radio" name="fundamt" id="25" value="25">
+								    $25
+								  </label>
+								</div>
+								<div class="input-group">
+							      <span class="input-group-addon">
+							        <input type="radio">
+							      </span>
+							      <span class="input-group-addon">$</span>
+							      <input type="text" id="customamt" class="form-control" placeholder="Enter a larger amount">
+							      <span class="input-group-addon">.00</span>
+							    </div><!-- /input-group -->
+				           	</div> <!-- form group -->
+				        </div> <!-- column -->
+				    </div> <!-- row -->
+				</div> <!-- tab pane -->
 
 				<div id="settings" class="tab-pane fade">
 					<h3 class="text-center">Edit project</h3>

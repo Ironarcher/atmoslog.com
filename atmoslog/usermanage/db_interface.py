@@ -117,6 +117,29 @@ def updateProject(oldname, name, access, description, default_tabletype):
 				newtablename = name + "-" + spl[1]
 				db[table].rename(newtablename)
 
+def updateTable(projectname, tablename, newtablename, newtabletype):
+	if re.match('^\w+$', newtablename) is None:
+		print('Only alphanumeric characters and underscores can be included in the table name.')
+		return
+	elif len(newtablename) > maximumlength:
+		print('Maximum length of the table name is 50 characters.')
+		return
+	elif newtabletype != "qualitative" and newtabletype != "quantitative_discrete" and newtabletype != "quantitative_continuous":
+		print('Tabletype incorrect')
+		return 
+
+	newtable = projectname + "-" + newtablename
+	oldtable = projectname + "-" + tablename
+	if newtablename != tablename:
+		db[oldtable].rename(newtable)
+		db[newtable].update({"type" : "description"}, {"$set" : {"tabletype" : newtabletype}})
+
+def deleteTable(projectname, tablename):
+	name = projectname + "-" + tablename
+	db.drop_collection(tablename)
+	if gettables(projectname) == 0:
+		createTable(projectname, "log", getTabletypeDefault(projectname))
+
 def chargeProject(project, amt):
 	projects = db['projects']
 	projectfile = projects.find_one({"name" : project})
@@ -229,6 +252,11 @@ def getProject(name):
 	projects = db['projects']
 	projectfile = projects.find_one({"name" : name})
 	return projectfile
+
+def getTabletype(projectname, tablename):
+	name = projectname + "-" + tablename
+	desc = db[name].find_one({"type" : "description"})
+	return desc['tabletype']
 
 def getTabletypeDefault(name):
 	projects = db['projects']
@@ -355,7 +383,11 @@ def getTimeGraph_alltime(projectname, tablename):
 	interval_list = []
 	#For finding the best fits for existing log datetimes
 	temp_list = []
-	set_int = total_time/intervals
+	#Bad code
+	if total_time < 1:
+		set_int = 1.0/200
+	else:
+		set_int = total_time/intervals
 	for i in range(int(intervals)):
 		interval_list.append({"datetime" : (first_time + set_int*i), "count" : 0})
 		temp_list.append(first_time + set_int*i)

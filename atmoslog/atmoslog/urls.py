@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^search/$', 'tablemanager.views.search'),
     url(r'^api/', include('logapi.urls')),
     url(r'^updates/', include('blog.urls')),
+    url(r'^like_project/$', 'tablemanager.views.like_project'),
 
     #User controls
     url(r'^login/$', 'usermanage.views.login_view'),

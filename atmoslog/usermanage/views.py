@@ -77,7 +77,7 @@ def register_view(request):
 		if re.match("^[A-Za-z]*$", lastname) is None:
 			#Names can only contain letters and spaces
 			issues.append("lastname_char")
-		if re.match("^[A-Za-z0-9@.]*$", email) is None or len(email) < 3:
+		if re.match("^[A-Za-z0-9@._]*$", email) is None or len(email) < 3:
 			#Email invalid
 			issues.append("email_char")
 		if check_user_exists(username):
@@ -97,6 +97,7 @@ def register_view(request):
 			user.profile.about_me = ""
 			user.profile.fav_language = "?"
 			user.profile.addPicture()
+			user.profile.start()
 			user.save()
 			#Redirect the user to the verification process
 			#TO-DO

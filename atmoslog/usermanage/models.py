@@ -217,6 +217,9 @@ class UserProfile(models.Model):
 	picture = models.CharField(max_length=200)
 	liked_projects = models.TextField()
 
+	def start(self):
+		self.liked_projects = '[]'
+
 	def addProject(self, project):
 		ls = self.getProjects()
 		ls.append(project)
@@ -228,14 +231,14 @@ class UserProfile(models.Model):
 		self.writeProjects(ls)
 
 	def getProjects(self):
-		return json.loads(self.liked_projects)
+		return json.loads(self.user.profile.liked_projects)
 
 	def writeProjects(self, replacement):
 		self.liked_projects = json.dumps(replacement)
 
 	def addPicture(self):
 		default = "mm"
-		hashemail = hashlib.md5(self.email.lower()).hexdigest()
+		hashemail = hashlib.md5(self.user.email.lower()).hexdigest()
 		self.picture = "http://www.gravatar.com/avatar/" + hashemail + "?d=" + default
 
 	def __unicode__ (self):
