@@ -119,6 +119,21 @@ def register_view(request):
 #Login is required to view this page
 def user_page(request):
 	if request.user.is_authenticated():
+		if request.method == 'POST':
+			if request.POST['formtype'] == "settings":
+				edit_aboutme = request.POST['aboutme'][:500]
+				edit_programlang = request.POST['programlang']
+				edit_country = request.POST['country']
+				edit_emailshow = request.POST.getlist('showemail[]')
+				if "yes" in edit_emailshow:
+					emailshow_final = True
+				else:
+					emailshow_final = False
+
+				#Commit changes
+				userp = request.user.profile 
+				userp.aboutme = 
+
 		authenticated = True
 		user = request.user
 		username = request.user.get_username()
