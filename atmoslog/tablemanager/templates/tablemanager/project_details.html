@@ -34,22 +34,28 @@
 
 {% block addscript %}
 $(document).ready(function() {
-	{% if liked %} var liked = true; {% endif %}
-	{% else %} var liked = false; {% endif %}
+	{% if liked %}
+	var liked = true;
+	{% else %}
+	var liked = false; 
+	{% endif %}
+	if(liked){
+		$("#likecontent").html(" Liked - {{ project_popularity }}");
+		$("#likeicon").toggleClass("glyphicon-heart-empty glyphicon-heart");
+	}
 	$('#like').click(function() {
 		if(liked){
-			$.get('/like_project', {project: {% specific_project %}}, function(data){
-				$("#like").html("<span id="likeicon" class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span> Like - " + data);
-			liked = false;
-			//Update class of likeicon to "glyphicon glyphicon-heart"
-			//$("#likeicon")
+			$.get('/like_project', {project: "{{ specific_project }}"}, function(data){
+				$("#likecontent").html(" Like - " + data);
+				$("#likeicon").toggleClass("glyphicon-heart-empty glyphicon-heart");
 			});
+			liked = false;
 		} else{
-			$.get('/like_project', {project: {% specific_project %}}, function(data){
-				$("#like").html("<span id="likeicon" class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span> Like - " + data);
+			$.get('/like_project', {project: "{{ specific_project }}"}, function(data){
+				$("#likecontent").html(" Liked - " + data);
+				$("#likeicon").toggleClass("glyphicon-heart glyphicon-heart-empty");
+			});
 			liked = true;
-			//Update class of likeicon to "glyphicon glyphicon-heart-empty"
-			//$("#likeicon")
 		}
 	});
 });
@@ -59,7 +65,7 @@ $(document).ready(function() {
 <div class="panel panel-default">
 	<div class="panel-heading"><p id="head_one" class="inline">Project details</p>
 		<button id="like" type="button" class="btn btn-default btn-sm">
-		  <span id="likeicon" class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span> Like - {{ project_popularity }}
+		  <span id="likeicon" class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span><div style="display: inline;" id="likecontent"> Like - {{ project_popularity }}</div>
 		</button>
 		<button id="share" type="button" class="btn btn-default btn-sm">
 		  <span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span> Share

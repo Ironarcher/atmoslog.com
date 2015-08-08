@@ -215,26 +215,11 @@ class UserProfile(models.Model):
 	fav_language = models.CharField(max_length=6, choices=LANGUAGES)
 	joined_on = models.DateField(auto_now_add=True)
 	picture = models.CharField(max_length=200)
-	liked_projects = models.TextField()
+	liked_projects = models.TextField(default="[]")
 
 	def start(self):
-		self.liked_projects = '[]'
-
-	def addProject(self, project):
-		ls = self.getProjects()
-		ls.append(project)
-		self.writeProjects(ls)
-
-	def deleteProject(self, project):
-		ls = self.getProjects()
-		ls.remove(project)
-		self.writeProjects(ls)
-
-	def getProjects(self):
-		return json.loads(self.user.profile.liked_projects)
-
-	def writeProjects(self, replacement):
-		self.liked_projects = json.dumps(replacement)
+		self.liked_projects = []
+		self.save()
 
 	def addPicture(self):
 		default = "mm"

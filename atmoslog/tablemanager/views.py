@@ -7,6 +7,7 @@ import db_interface
 
 import re
 import math
+import json
 import time
 
 def index(request):
@@ -356,8 +357,9 @@ def project_settings(request, projectname):
 		edit_first = True
 
 	#Check if the user has liked the project
-	print(request.user.profile.getProjects())
-	if projectname in request.user.profile.getProjects():
+	userp = request.user.profile
+	projlist = json.decoder.JSONDecoder().decode(userp.liked_projects)
+	if projectname in projlist:
 		liked = True
 	else:
 		liked = False
@@ -444,19 +446,30 @@ def like_project(request):
 		if request.GET:
 			if 'project' in request.GET:
 				project = request.GET['project']
-				if project in request.user.profile.getProjects():
+				userp = request.user.profile
+				if userp.liked_projects == "":
+					userp.liked_projects = "[]"
+					userp.save()
+				projlist = json.decoder.JSONDecoder().decode(userp.liked_projects)
+				if project in request.user.profile.liked_projects:
 					#Unlike the project
-					request.user.profile.deleteProject(project)
+					projlist.remove(project)
+					userp.liked_projects = json.dumps(projlist)
+					userp.save()
 					db_interface.unlikeProject(project)
 				else:
 					#Like the project
-					request.user.profile.addProject(project)
+					projlist.append(project)
+					userp.liked_projects = json.dumps(projlist)
+					userp.save()
 					db_interface.likeProject(project)
+
+				projectfile = db_interface.getProject(project)
+				return HttpResponse(projectfile['popularity'])
 			else:
 				return HttpResponseRedirect('/')
-
-		projectfile = db_interface.getProject(project)
-		return HttpResponse(projectfile['popularity'])
+		else:
+			return HttpResponseRedirect('/')
 	else:
 		return HttpResponseRedirect('/')
 
