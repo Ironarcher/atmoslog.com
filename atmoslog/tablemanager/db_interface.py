@@ -117,6 +117,16 @@ def updateProject(oldname, name, access, description, default_tabletype):
 				newtablename = name + "-" + spl[1]
 				db[table].rename(newtablename)
 
+def deleteProject(projectname):
+	#Delete the entry in the projects collection
+	projects = db['projects']
+	projects.remove({"name" : projectname})
+
+	#Delete all tables associated
+	tables = gettables(projectname)
+	for table in tables:
+		db[table].drop()
+
 def updateTable(projectname, tablename, newtablename, newtabletype):
 	if re.match('^\w+$', newtablename) is None:
 		print('Only alphanumeric characters and underscores can be included in the table name.')

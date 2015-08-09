@@ -9,6 +9,7 @@ import hashlib
 class UserProfile(models.Model):
 	user = models.OneToOneField(settings.AUTH_USER_MODEL, primary_key=True)
 	about_me = models.CharField(max_length=500)
+	showemail = models.BooleanField(default=False)
 	LANGUAGES = (
 		('?', 'Undecided'),
 		('py', 'Python'),
@@ -30,6 +31,7 @@ class UserProfile(models.Model):
 		('go', 'Go'),
 	)
 	COUNTRIES = (
+		('?', 'Unknown'),
 		('afghanistan', 'Afghanistan'),
 		('albania', 'Albania'),
 		('algeria', 'Algeria'),
@@ -70,8 +72,8 @@ class UserProfile(models.Model):
 		('demcongo', 'Congo, Democratic Republic'),
 		('costarica', 'Costa Rica'),
 		('croatia', 'Croatia'),
-		('cuba', 'cuba'),
-		('cyprus', 'cyprus'),
+		('cuba', 'Cuba'),
+		('cyprus', 'Cyprus'),
 		('czechrepublic', 'Czech Republic'),
 		('denmark', 'Denmark'),
 		('djibouti', 'Djibouti'),
@@ -201,7 +203,7 @@ class UserProfile(models.Model):
 		('ukraine', 'Ukraine'),
 		('unitedarabemirates', 'United Arab Emirates'),
 		('uk', 'United Kingdom'),
-		('usa', 'USA'),
+		('usa', 'United States of America'),
 		('uruguay', 'Uruguay'),
 		('uzbekistan', 'Uzbekistan'),
 		('vanuatu', 'Vanuatu'),
@@ -211,15 +213,12 @@ class UserProfile(models.Model):
 		('yemen', 'Yemen'),
 		('zambia', 'Zambia'),
 		)
-	country = models.CharField(max_length=50, choices=COUNTRIES)
-	fav_language = models.CharField(max_length=6, choices=LANGUAGES)
+	country = models.CharField(max_length=50, choices=COUNTRIES, default="?")
+	fav_language = models.CharField(max_length=6, choices=LANGUAGES, default="?")
 	joined_on = models.DateField(auto_now_add=True)
 	picture = models.CharField(max_length=200)
 	liked_projects = models.TextField(default="[]")
-
-	def start(self):
-		self.liked_projects = []
-		self.save()
+	recently_viewed_projects = models.TextField(default="[]")
 
 	def addPicture(self):
 		default = "mm"

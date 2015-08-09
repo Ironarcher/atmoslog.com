@@ -58,6 +58,10 @@ $(document).ready(function() {
 			liked = true;
 		}
 	});
+
+	$('#deleteproject').click(function(event){
+		return window.confirm("Are you sure you want to delete this project? All data will be irreversibly erased. All tables will also be destroyed.");
+	});
 });
 {% endblock %}
 
@@ -251,6 +255,14 @@ $(document).ready(function() {
 						                <input type="hidden" name="formtype" value="change_status" />
 					            	</form>
 					            	{% endif %}
+					            </br>
+					            	<form method="post" action="/log/{{ specific_project }}/" role="form">
+					                	{% csrf_token %}
+					                	<div class="text-center">
+						                    <button type="submit" value="delete" class="btn btn-danger" id="deleteproject">Delete Project</button>
+						                </div>
+						                <input type="hidden" name="formtype" value="delete_project" />
+					            	</form>
 				            	</div> <!-- panel body -->
 				            </div> <!-- panel -->
 				        </div> <!-- column -->

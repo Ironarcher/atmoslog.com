@@ -172,6 +172,7 @@ def projectlog(request, projectname, tablename):
 		'discretecontinuous' : discretecontinuous,
 		'issues' : issues,
 		'projectlist' : projectlist,
+		'lenprojectlist' : len(projectlist),
 		'myproject' : myproject,
 		'freq_log' : freq_log,
 		'ch1_data' : ch1_data,
@@ -208,7 +209,6 @@ def create(request):
 		name = request.POST['name']
 		description = request.POST['description']
 		creator = request.user.get_username()
-		#TODO: fix the access (can only be private for some reason)
 		access = request.POST.getlist('public[]')
 		if "public" in access:
 			access_final = "public"
@@ -237,7 +237,10 @@ def create(request):
 
 			#Add this project to liked projects
 			userp = request.user.profile
-			projlist = json.decoder.JSONDecoder().decode(userp.liked_projects)
+			try:
+				projlist = json.decoder.JSONDecoder().decode(userp.liked_projects)
+			except ValueError:
+				projlist = []
 			projlist.append(name)
 			userp.liked_projects = json.dumps(projlist)
 			userp.save()
@@ -364,6 +367,9 @@ def project_settings(request, projectname):
 			elif projectfile['status'] == "stopped":
 				db_interface.changeStatus(projectname, "running")
 			return HttpResponseRedirect('/log/%s' % projectname)
+		elif request.POST['formtype'] == "delete_project":
+			db_interface.deleteProject(projectname)
+			return HttpResponseRedirect('/account/')
 	else:
 		quanqual = db_interface.getTabletypeDefault(projectname)
 		first = True
@@ -404,6 +410,7 @@ def project_settings(request, projectname):
 		'issues' : issues,
 		'issues2' : issues2,
 		'projectlist' : projectlist,
+		'lenprojectlist' : len(projectlist),
 		'myproject' : myproject,
 		'liked' : liked,
 	}
@@ -453,6 +460,7 @@ def search(request):
 	}
 	return render(request, 'tablemanager/search.html', context)
 
+#Ajax method
 def like_project(request):
 	if request.user.is_authenticated():
 		popularity = 0

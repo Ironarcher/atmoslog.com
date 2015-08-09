@@ -132,7 +132,12 @@ def user_page(request):
 
 				#Commit changes
 				userp = request.user.profile 
-				userp.aboutme = 
+				userp.about_me = edit_aboutme
+				userp.fav_language = edit_programlang
+				userp.country = edit_country
+				userp.showemail = emailshow_final
+				userp.save()
+				HttpResponseRedirect('/account/')
 
 		authenticated = True
 		user = request.user
@@ -147,6 +152,7 @@ def user_page(request):
 		favorite_language = userobj.profile.fav_language
 		join_date = userobj.profile.joined_on
 		profile_picture = userobj.profile.picture
+		country = userobj.profile.country
 
 		context = {
 		"authenticated" : authenticated,
@@ -154,11 +160,8 @@ def user_page(request):
 		"firstname" : firstname,
 		"lastname" : lastname,
 		"email" : email,
-		"about_me" : about_me,
-		"favorite_language" : favorite_language,
-		"join_date" : join_date,
+		"userp" : userobj.profile,
 		"user_projects" : db_interface.getUserProjects(username),
-		"profile_picture" : profile_picture
 		}
 		return render(request, 'usermanage/account.html', context)
 	else:

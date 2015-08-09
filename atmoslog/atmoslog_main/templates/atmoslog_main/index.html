@@ -42,7 +42,24 @@
 			#headbutton{
 				margin-top: 20px;
 			}
+			.mainarrow{
+				margin-top: 40px;
+			}
+			.basiclist{
+				margin-bottom: -2px;
+			}
 		</style>
+
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$("#sendfeedback").on('click' ,function(){
+					var feedback = $("#feedbackbox").val();
+					$.get('/send_feedback', {text: feedback}, function(data){
+					});
+					$(this).button('complete')
+				});	
+			});
+		</script>
 	</head>
 
 	<body>
@@ -95,14 +112,84 @@
 					</div>
 				</div>
 			<div class="container">
+				<!-- How it works -->	
 				<div class="page-header">
-					<h1 class="text-center">Database for Lots of Tiny Pieces of Data</h1>
+					<h1 class="text-center">How it works</h1>
 				</div>
+				<div class="row">
+					<div class="col-md-3">
+						<div class="text-center">
+							<img src="" alt="tablets and computers">
+							<p>1. Send, log, and record small pieces of data through our API</p>
+							<a href="/docs/"><u>API Documentation</u></a>
+						</div>
+					</div>
+					<div class="col-md-1">
+						<div class="text-center">
+							<span class="glyphicon glyphicon-arrow-right mainarrow" aria-hidden="true"></span>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="text-center">
+							<img src="" alt="stack of servers">
+							<p>2. Our servers provide great uptime, free, unlimited data storage, and handle sharding and replication to allow your apps to scale infinitly.</p>
+							<a href="/pricing/"><u>Pricing</u></a>
+						</div>
+					</div>
+					<div class="col-md-1">
+						<div class="text-center">
+							<span class="glyphicon glyphicon-arrow-right mainarrow" aria-hidden="true"></span>
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="text-center">
+							<img src="" alt="analysis table view">
+							<p>3. Overview and analyze your data for free from anywhere. Automatically generate charts and graphs to monitor your data.</p>
+							<a href="/create/"><u>Create a project</u></a>
+						</div>
+					</div> 	
+				</div> <!-- row -->
 				</br>
 				<div class="page-header">
-					<h1 class="text-center">Built-in Data Analysis</h1>
+					<h1 class="text-center">How it works</h1>
 				</div>
+					<div class="row">
+						<div class="col-md-5">
+							<div class="text-center">
+								<p>Log data from anywhere:</p>
+								<p class="basiclist">- A website's server</p>
+								<p class="basiclist">- A mobile device</p>
+								<p class="basiclist">- Any machine or appliance connected to the cloud<p>
+							</div>
+						</div>
+						<div class="col-md-5 col-md-offset-2">
+							<ul>
+								<li>Same pricing scheme and advanced toolkit for everyone</li>
+								<li>The more you log, the cheaper it gets</li>
+								<li>No barrier for expansion. No limits on scaling</li>
+							</ul>
+						</div>
+					</div>
 				</br>
+				<div class="page-header">
+					<h1 class="text-center">Get in touch</h1>
+				</div>
+				<div class="row">
+					<div class="col-md-6 col-md-offset-3">
+						<div class="input-group">
+					      <input type="text" id="feedbackbox" class="form-control" aria-label="feedback_send" placeholder="Enter feedback, comments, compliments, concerns, or bugs"></input>
+					      <div class="input-group-btn" data-toggle="buttons">
+					        <button id="sendfeedback" class="btn btn-default" type="button" data-complete-text="Sent!" autocomplete="off">Send</button>
+					      </div> <!-- /btn-group -->
+					    </div> <!-- /input-group -->
+					</div> <!-- column -->
+				</div> <!-- row -->
+			</br>
+				<p class="text-center">To get support, send an email to <a href="mailTo:support@atmoslog.com">support@atmoslog.com</a></p>
+				<p class="text-center">For business or information inquiries, send an email to <a href="mailTo:contact@atmoslog.com">contact@atmoslog.com</a></p>
+			<div class="container">
+				<!-- Footer -->
+
 			</div>
 		</div>
 	</body>

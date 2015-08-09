@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^api/', include('logapi.urls')),
     url(r'^updates/', include('blog.urls')),
     url(r'^like_project/$', 'tablemanager.views.like_project'),
+    url(r'^send_feedback/$', 'atmoslog_main.views.send_feedback'),
 
     #User controls
     url(r'^login/$', 'usermanage.views.login_view'),
