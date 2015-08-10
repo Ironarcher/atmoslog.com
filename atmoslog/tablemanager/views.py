@@ -82,7 +82,7 @@ def projectlog(request, projectname, tablename):
 			edit_name = request.POST['edit_name']
 			edit_tabletype = request.POST['edit_quanqual']
 
-			if len(edit_name) < 4 or len(edit_name) > 50:
+			if len(edit_name) < 3 or len(edit_name) > 50:
 				#Table name must be 4-50 characters long.
 				issues2.append("name_length")
 			if re.match('^\w+$', edit_name) is None and len(edit_name) != 0:

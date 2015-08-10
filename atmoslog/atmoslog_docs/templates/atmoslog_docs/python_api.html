@@ -20,6 +20,9 @@
 			<div class="panel-body">
 				<ol>
 					<li><a href="#installation">Installation</a></li>
+					<li><a href="#init">Starting up</a></li>
+					<li><a href="#functions">Functions</a></li>
+					<li><a href="#exceptions">Exceptions</a></li>
 				</ol>
 			</div>
 		</div> <!-- panel -->
@@ -39,14 +42,14 @@
 		<h3>Starting up</h3>
 	</div>
 	<p>The python API allows you to write logs into your projects, get the status of your projects, and create new tables. This is all done through the Logger class. However, you must know your project's private key, which is shown on your project dashboard. Do not share your private key and do not explictly put the key in your code.</p>
-	<pre>import atmos_python
+	<pre>import atmos-python
 
 #Keep your private key secure. For example, this is a good practice:
 #import os
 #private_key = os.environ.get('atmoskey')
 private_key = "example_key"
 	
-logger = atmos_python.Logger(private_key)</pre>
+logger = atmos-python.Logger(private_key)</pre>
 	
 </div>
 
@@ -56,7 +59,39 @@ logger = atmos_python.Logger(private_key)</pre>
 	</div>
 	
 	<p>To write a log to your project, use <code>Logger.log(tablename, log_text)</code>.</p>
-	<p>The API only writes to the server every once in a while. 
+	<p>The API only writes to the server every once in a while. The caching mechanism measures the amount of memory taken up by logs writen to the API. For example, the default is ~10 kilobytes of logs before the API writes the logs to servers through HTTPS. To change the memory size of the cache, use <code>Logger.max_cache_size = 100000</code> (this changed the cache size to 100kb).</p>
+	<p>To get the status of your project, use <code>Logger.getStatus()</code>. This will return information about your project. This method is called when you initialize the Logger class. It will print "go" if everything is running.</p>
+	<p>To create a table in your project, use <code>Logger.createTable(new_tablename)</code>. An exception will be raised if the table name is already taken.</p>
+	<p>To manually commit your logs to the server, use <code>Logger.commit()</code>. This is not recommended because the caching mechanism automatically calls this method if the cache fills up.</p>
+	<p>An example:</p>
+	<pre>import atmos-python
+
+private_key = "example_key"
+
+logger = atmos-python.Logger(private_key)
+#Automatically checks the status of the project and servers.
+if logger.recentPrint == "go":
+	#Checks the last thing printed. If the status is ready, then start.
+	logger.createTable("feedback-2")
+	logger.max_cache_size = 1000000
+	logger.log("feedback-2", "First log")</pre>
+</div>
+
+<div id="exceptions">
+	<div class="page-header">
+		<h3>Exceptions</h3>
+	</div>
+	
+	<p><code>Atmos404Error</code> - An incorrect syntax has been used in the private API key or a table name. Confirm that your API key is correct and new table names must be 4 to 50 characters in length with alphanumeric characters and underscores.</p>
+	<p><code>TableDoesNotExistError</code> - Trying to access a table that does not exist.</p>
+	<p><code>ApiKeyDoesNotExistError</code> - Trying to use an API Key that does not exist (uses valid syntax but does not match any other project)</p>
+	<p><code>TableNameTakenError</code> - Can be called when using <code>Logger.createTable(tablename)</code> because you are trying to create a table with a name that is already being used in your project.</p>
+	<p>To get more information about your errors:</p>
+	<pre>try:
+	logger = atmos-python.Logger(private_key)
+except atmos-python.Atmos404Error as e:
+	print(e.msg)</pre>
+
 </div>
 
 {% endblock %}
