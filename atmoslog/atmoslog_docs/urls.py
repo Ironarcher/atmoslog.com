@@ -6,4 +6,5 @@ urlpatterns = [
 	url(r'^$', views.docs_index),
 	url(r'^getstarted/$', views.getstarted),
 	url(r'^webapi/$', views.webapi),
+	url(r'^python/$', views.python_api),
 ]
