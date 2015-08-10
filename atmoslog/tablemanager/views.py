@@ -22,7 +22,9 @@ def projectlog(request, projectname, tablename):
 	#For navbar control and user access verification
 	if request.user.is_authenticated():
 		user = request.user.get_username()
-		access = db_interface.getProjectAccess(projectname) 
+		access = db_interface.getProjectAccess(projectname)
+		if tablename not in db_interface.gettables(projectname):
+			return HttpResponseRedirect('/log/%s' % (projectname, ))
 		if access is None:
 			raise Http404("Project does not exist.")
 		elif access == "private":
@@ -42,6 +44,9 @@ def projectlog(request, projectname, tablename):
 
 	else:
 		return HttpResponseRedirect('/login?next=/log/%s/%s/' % (projectname, tablename))
+
+	#Recently viewed project handler
+	addRecentProject(request.user.profile, projectname)
 
 	issues = []
 	issues2 = []
@@ -296,6 +301,9 @@ def project_settings(request, projectname):
 		length = len(projectname) + 1
 		for table in tables:
 			revisedtables.append(table[length:])
+
+		#Recently viewed project handler
+		addRecentProject(request.user.profile, projectname)
 
 	#Verify post results and handle forms
 	issues = []
@@ -576,3 +584,25 @@ def normalize(number):
 		return str(round(float(number)/1000, 1)) + "k"
 	else:
 		return str(number)
+
+def getRecentProjects(userprofile):
+	try:
+		return json.decoder.JSONDecoder().decode(userprofile.recently_viewed_projects)
+	except ValueError:
+		return []
+
+def addRecentProject(userprofile, projectname):
+	#Size of your recent projects
+	max_size = 5
+	projlist = getRecentProjects(userprofile)
+	if projectname not in projlist:
+		if len(projlist) == max_size:
+			projlist.pop(max_size - 1)
+		projlist.insert(0, projectname)
+	else:
+		projlist.remove(projectname)
+		projlist.insert(0, projectname)
+	userprofile.recently_viewed_projects = json.dumps(projlist)
+	userprofile.save()
+
+	

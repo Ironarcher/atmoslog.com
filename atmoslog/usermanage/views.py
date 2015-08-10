@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 
 import re
 import db_interface
+import json
 
 # All views relating to users
 
@@ -97,7 +98,6 @@ def register_view(request):
 			user.profile.about_me = ""
 			user.profile.fav_language = "?"
 			user.profile.addPicture()
-			user.profile.start()
 			user.save()
 			#Redirect the user to the verification process
 			#TO-DO
@@ -154,6 +154,46 @@ def user_page(request):
 		profile_picture = userobj.profile.picture
 		country = userobj.profile.country
 
+		#Handle project search feature
+		recent_names = []
+		recent_popularities = []
+		recent_total_logs = []
+		recent_admins = []
+		for project in db_interface.getProjectInfo_list(getRecentProjects(request.user.profile)):
+			recent_names.append(project['name'])
+			recent_popularities.append(normalize(project['popularity']))
+			recent_total_logs.append(normalize(project['total_logs']))
+			recent_admins.append(project['admins'][0])
+		recent_projects = zip(recent_names, recent_popularities, recent_total_logs, recent_admins)
+
+		liked_names = []
+		liked_popularities = []
+		liked_total_logs = []
+		liked_admins = []
+		#Filter for projects that the user liked but does not own
+		userp = request.user.profile
+		projlist = json.decoder.JSONDecoder().decode(userp.liked_projects)
+		ownedlist = db_interface.getUserProjects(request.user.get_username())
+		finallist = [item for item in projlist if item not in ownedlist]
+		if len(finallist) != 0:
+			for project in db_interface.getProjectInfo_list(finallist):
+				liked_names.append(project['name'])
+				liked_popularities.append(normalize(project['popularity']))
+				liked_total_logs.append(normalize(project['total_logs']))
+				liked_admins.append(project['admins'][0])
+			liked_projects = zip(liked_names, liked_popularities, liked_total_logs, liked_admins)
+		else:
+			liked_projects = []
+
+		names = []
+		popularities = []
+		total_logs = []
+		for project in db_interface.getProjectInfo_list(db_interface.getUserProjects(request.user.get_username())):
+			names.append(project['name'])
+			popularities.append(normalize(project['popularity']))
+			total_logs.append(normalize(project['total_logs']))
+		projects = zip(names, popularities, total_logs)
+
 		context = {
 		"authenticated" : authenticated,
 		"user" : user,
@@ -161,7 +201,9 @@ def user_page(request):
 		"lastname" : lastname,
 		"email" : email,
 		"userp" : userobj.profile,
-		"user_projects" : db_interface.getUserProjects(username),
+		"recent_projects" : recent_projects,
+		"liked_projects" : liked_projects,
+		"user_projects" : projects,
 		}
 		return render(request, 'usermanage/account.html', context)
 	else:
@@ -226,11 +268,32 @@ def check_email_exists(email):
 	else:
 		return False
 
-'''
-def get_gravatar(user):
-	userobj = User.objects.get(username=user)
-	email = userobj.email
+def normalize(number):
+	if number > 1000000000:
+		return str(round(float(number)/1000000000, 1)) + "b"
+	elif number > 1000000:
+		return str(round(float(number)/1000000, 1)) + "m"
+	elif number > 1000:
+		return str(round(float(number)/1000, 1)) + "k"
+	else:
+		return str(number)
 
-	#Create url to get the get_profile
-	profilepic = 
-'''
+def getRecentProjects(userprofile):
+	try:
+		return json.decoder.JSONDecoder().decode(userprofile.recently_viewed_projects)
+	except ValueError:
+		return []
+
+def addRecentProject(userprofile, projectname):
+	#Size of your recent projects
+	max_size = 5
+	projlist = getRecentProjects(userprofile)
+	if projectname not in projlist:
+		if len(projlist) == max_size:
+			projlist.pop(max_size - 1)
+		projlist.insert(0, projectname)
+	else:
+		projlist.remove(projectname)
+		projlist.insert(0, projectname)
+	userprofile.recently_viewed_projects = json.dumps(projlist)
+	userprofile.save()

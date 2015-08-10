@@ -255,6 +255,13 @@ def getUserProjects(username):
 		result.append(project['name'])
 	return result
 
+def getProjectInfo_list(projectnames):
+	projects = db['projects']
+	results = []
+	for project in projectnames:
+		results.append(projects.find_one({"name" : project}))
+	return results
+
 def getProjectAccess(project):
 	projects = db['projects']
 	projectfile = projects.find_one({"name" : project})
