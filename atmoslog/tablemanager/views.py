@@ -23,7 +23,7 @@ def projectlog(request, projectname, tablename):
 	if request.user.is_authenticated():
 		user = request.user.get_username()
 		access = db_interface.getProjectAccess(projectname)
-		if tablename not in db_interface.gettables(projectname):
+		if projectname + "-" + tablename not in db_interface.gettables(projectname):
 			return HttpResponseRedirect('/log/%s' % (projectname, ))
 		if access is None:
 			raise Http404("Project does not exist.")
