@@ -216,14 +216,9 @@ class UserProfile(models.Model):
 	country = models.CharField(max_length=50, choices=COUNTRIES, default="?")
 	fav_language = models.CharField(max_length=6, choices=LANGUAGES, default="?")
 	joined_on = models.DateField(auto_now_add=True)
-	picture = models.CharField(max_length=200)
+	picture = models.TextField()
 	liked_projects = models.TextField(default="[]")
 	recently_viewed_projects = models.TextField(default="[]")
-
-	def addPicture(self):
-		default = "mm"
-		hashemail = hashlib.md5(self.user.email.lower()).hexdigest()
-		self.picture = "http://www.gravatar.com/avatar/" + hashemail + "?d=" + default
 
 	def __unicode__ (self):
 		return self.user.username

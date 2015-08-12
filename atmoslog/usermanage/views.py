@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 import re
 import db_interface
 import json
+import hashlib
 
 # All views relating to users
 
@@ -97,7 +98,7 @@ def register_view(request):
 				user.last_name = lastname
 			user.profile.about_me = ""
 			user.profile.fav_language = "?"
-			user.profile.addPicture()
+			user.profile.picture = addPicture(email)
 			user.save()
 			#Redirect the user to the verification process
 			#TO-DO
@@ -193,6 +194,15 @@ def user_page(request):
 			popularities.append(normalize(project['popularity']))
 			total_logs.append(normalize(project['total_logs']))
 		projects = zip(names, popularities, total_logs)
+		
+		#Temporary code to fix gravatar image
+		if userp.picture is None or userp.picture == "":
+			print('activated')
+			#u = User.objects.get(username=request.user.get_username())
+			print(addPicture(email))
+			userp.picture = addPicture(email)
+			#print(u.profile.picture)
+			userp.save()
 
 		context = {
 		"authenticated" : authenticated,
@@ -204,6 +214,7 @@ def user_page(request):
 		"recent_projects" : recent_projects,
 		"liked_projects" : liked_projects,
 		"user_projects" : projects,
+		"profile_picture" : userp.picture + "&s=150",
 		}
 		return render(request, 'usermanage/account.html', context)
 	else:
@@ -297,3 +308,8 @@ def addRecentProject(userprofile, projectname):
 		projlist.insert(0, projectname)
 	userprofile.recently_viewed_projects = json.dumps(projlist)
 	userprofile.save()
+
+def addPicture(email):
+	default = "mm"
+	hashemail = hashlib.md5(email.lower()).hexdigest()
+	return "http://www.gravatar.com/avatar/" + hashemail + "?d=" + default
