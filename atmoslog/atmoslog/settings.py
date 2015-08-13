@@ -25,7 +25,9 @@ SECRET_KEY = os.environ.get('ATMOSLOG_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '74.208.64.173', 'atmoslog.com', '127.0.0.1', 'localhost', '*.atmoslog.com',
+]
 
 
 # Application definition
@@ -110,6 +112,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = '/proj/atmoslog/atmoslog.com/atmoslog/static_deploy'
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
