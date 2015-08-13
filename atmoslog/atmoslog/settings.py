@@ -20,10 +20,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'sk!=zwv)tvfd+%^6i#(j%&ci&y%=jtz&&$g+p82e+5)e7+80!n'
+SECRET_KEY = os.environ.get('ATMOSLOG_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -82,8 +82,12 @@ WSGI_APPLICATION = 'atmoslog.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'atmoslog',
+        'USER' : 'atmos_server',
+        'PASSWORD' : os.environ.get('POSTGRE_PASSWORD'),
+        'HOST' : 'localhost',
+        'PORT' : '',
     }
 }
 
@@ -93,7 +97,7 @@ DATABASES = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'CST'
+TIME_ZONE = 'America/Chicago'
 
 USE_I18N = True
 
